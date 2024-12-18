@@ -8,22 +8,6 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 4000;
 
-// Mock credentials
-const USERNAME = 'wanglab';
-const PASSWORD = 'advfoodpackaging';
-
-// Login API
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-
-    if (username === USERNAME && password === PASSWORD) {
-        res.status(200).json({ message: 'Login successful' });
-    } else {
-        res.status(401).json({ message: 'Invalid username or password' });
-    }
-});
-
-
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
