@@ -20,62 +20,7 @@
             font-size: 2.5em;
         }
 
-        /* 登录弹窗样式 */
-        .login-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .login-box {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            width: 300px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        .login-box h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .login-box input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .login-box button {
-            width: 100%;
-            padding: 10px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-
-        .login-box button:hover {
-            background-color: #bd2130;
-        }
-
-        /* 主界面样式 */
-        .hidden {
-            display: none;
-        }
-
-        /* 其他样式同之前 */
+        /* 表单容器样式 */
         .form-container {
             width: 90%;
             max-width: 1000px;
@@ -84,7 +29,7 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: flex;
+            display: none; /* 初始隐藏 */
             flex-wrap: wrap;
             gap: 20px;
             justify-content: space-between;
@@ -129,6 +74,7 @@
             background-color: #bd2130;
         }
 
+        /* 表格样式 */
         table {
             width: 90%;
             max-width: 1000px;
@@ -163,110 +109,218 @@
         .delete-button:hover {
             background-color: #bd2130;
         }
+
+        /* 登录弹窗样式 */
+        #loginModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 300px;
+        }
+
+        #loginModal input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #loginModal button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #loginModal button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
-    <!-- 登录弹窗 -->
-    <div class="login-modal" id="loginModal">
-        <div class="login-box">
-            <h2>Login</h2>
-            <input type="text" id="username" placeholder="Username">
-            <input type="password" id="password" placeholder="Password">
-            <button onclick="login()">Login</button>
+    <div id="loginModal">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <h1 style="display: none;">Dr. Wang's Lab Chemical Management System</h1>
+
+    <!-- 表单容器 -->
+    <div class="form-container">
+        <div class="form-row">
+            <label for="chemicalName">Chemical Name:</label>
+            <input type="text" id="chemicalName">
+
+            <label for="chemicalType">Chemical Type:</label>
+            <select id="chemicalType">
+                <option value="Solid">Solid</option>
+                <option value="Liquid">Liquid</option>
+                <option value="Fridge">Fridge</option>
+            </select>
+
+            <label for="purity">Purity:</label>
+            <input type="text" id="purity">
+
+            <label for="size">Size:</label>
+            <input type="text" id="size">
+        </div>
+
+        <div class="form-row">
+            <label for="quantity">Quantity:</label>
+            <input type="text" id="quantity">
+
+            <label for="date">Date:</label>
+            <input type="date" id="date">
+
+            <label for="recordedBy">Recorded By:</label>
+            <input type="text" id="recordedBy">
+
+            <button class="add-button" onclick="addChemical()">Add Chemical</button>
         </div>
     </div>
 
-    <!-- 主界面 -->
-    <div id="mainContent" class="hidden">
-        <h1>Dr. Wang's Lab Chemical Management System</h1>
-        <!-- 表单容器和表格内容 -->
-        <div class="form-container">
-            <div class="form-row">
-                <label for="chemicalName">Chemical Name:</label>
-                <input type="text" id="chemicalName">
-
-                <label for="chemicalType">Chemical Type:</label>
-                <select id="chemicalType">
-                    <option value="Solid">Solid</option>
-                    <option value="Liquid">Liquid</option>
-                    <option value="Fridge">Fridge</option>
-                </select>
-
-                <label for="purity">Purity:</label>
-                <input type="text" id="purity">
-
-                <label for="size">Size:</label>
-                <input type="text" id="size">
-            </div>
-
-            <div class="form-row">
-                <label for="quantity">Quantity:</label>
-                <input type="text" id="quantity">
-
-                <label for="date">Date:</label>
-                <input type="date" id="date">
-
-                <label for="recordedBy">Recorded By:</label>
-                <input type="text" id="recordedBy">
-
-                <button class="add-button" onclick="addChemical()">Add Chemical</button>
-            </div>
-        </div>
-
-        <!-- 表格 -->
-        <table>
-            <thead>
-                <tr>
-                    <th>Chemical Name</th>
-                    <th>Chemical Type</th>
-                    <th>Purity</th>
-                    <th>Size</th>
-                    <th>Quantity</th>
-                    <th>Date</th>
-                    <th>Recorded By</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- 数据行将会动态添加到这里 -->
-            </tbody>
-        </table>
-    </div>
+    <!-- 表格 -->
+    <table style="display: none;">
+        <thead>
+            <tr>
+                <th>Chemical Name</th>
+                <th>Chemical Type</th>
+                <th>Purity</th>
+                <th>Size</th>
+                <th>Quantity</th>
+                <th>Date</th>
+                <th>Recorded By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- 数据行将会动态添加到这里 -->
+        </tbody>
+    </table>
 
     <script>
-        // 登录功能
+        const API_BASE_URL = 'https://lab-chemical-manager.onrender.com'; // 后端 API 地址
+
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
             if (username === 'wanglab' && password === 'advfoodpackaging') {
                 document.getElementById('loginModal').style.display = 'none';
-                document.getElementById('mainContent').classList.remove('hidden');
+                document.querySelector('h1').style.display = 'block';
+                document.querySelector('.form-container').style.display = 'flex';
+                document.querySelector('table').style.display = 'table';
+                loadChemicals();
             } else {
-                alert('Invalid username or password. Please try again.');
+                alert('Invalid credentials!');
             }
         }
 
-        // 其他代码保持不变
-        const API_BASE_URL = 'https://lab-chemical-manager.onrender.com';
-
         async function addChemical() {
-            // 与之前代码一致
+            const chemicalName = document.getElementById('chemicalName').value;
+            const chemicalType = document.getElementById('chemicalType').value;
+            const purity = document.getElementById('purity').value;
+            const size = document.getElementById('size').value;
+            const quantity = document.getElementById('quantity').value;
+            const date = document.getElementById('date').value;
+            const recordedBy = document.getElementById('recordedBy').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/addChemical`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ chemicalName, chemicalType, purity, size, quantity, date, recordedBy }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to add chemical.');
+                }
+
+                alert(data.message);
+                loadChemicals(); // 重新加载表格
+
+                // 清空表单
+                document.getElementById('chemicalName').value = '';
+                document.getElementById('chemicalType').value = 'Solid';
+                document.getElementById('purity').value = '';
+                document.getElementById('size').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('date').value = '';
+                document.getElementById('recordedBy').value = '';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding chemical: ' + error.message);
+            }
         }
 
         async function loadChemicals() {
-            // 与之前代码一致
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chemicals`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to load chemicals.');
+                }
+
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = ''; // 清空表格
+
+                data.forEach(row => {
+                    const newRow = `
+                        <tr>
+                            <td>${row.name}</td>
+                            <td>${row.type}</td>
+                            <td>${row.purity}</td>
+                            <td>${row.size}</td>
+                            <td>${row.quantity}</td>
+                            <td>${row.date}</td>
+                            <td>${row.recorded_by}</td>
+                            <td><button class="delete-button" onclick="deleteChemical(${row.id})">Delete</button></td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', newRow);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading chemicals: ' + error.message);
+            }
         }
 
         async function deleteChemical(id) {
-            // 与之前代码一致
-        }
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chemicals/${id}`, {
+                    method: 'DELETE',
+                });
 
-        window.onload = function() {
-            // 防止未登录时加载主界面数据
-            if (!document.getElementById('loginModal').style.display === 'none') return;
-            loadChemicals();
-        };
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                alert(data.message);
+                loadChemicals(); // 重新加载表格
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete chemical. Please try again.');
+            }
+        }
     </script>
 </body>
 </html>
