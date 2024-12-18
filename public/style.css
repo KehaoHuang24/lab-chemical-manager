@@ -1,64 +1,22 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 0; /* 去掉默认 margin */
-    padding: 0;
-    background-color: #f9f9f9; /* 背景颜色 */
+    margin: 20px;
 }
-
 h1, h2 {
     text-align: center;
-    margin: 20px 0;
-    color: #333; /* 标题颜色 */
 }
-
 form {
-    margin: 20px auto; /* 居中显示表单 */
-    width: 90%;
-    max-width: 800px;
-    padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
-
 table {
-    width: 90%;
-    margin: 0 auto; /* 表格居中 */
+    width: 100%;
     border-collapse: collapse;
-    background-color: #fff;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 10px;
+table, th, td {
+    border: 1px solid black;
     text-align: center;
 }
-
-th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-    color: #333;
-}
-
-button {
-    padding: 8px 12px;
-    background-color: #007bff; /* 蓝色按钮 */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.delete-button {
-    background-color: #dc3545; /* 删除按钮红色 */
-}
-
-.delete-button:hover {
-    background-color: #c82333;
+th, td {
+    padding: 8px;
 }
