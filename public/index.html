@@ -14,14 +14,13 @@
             color: #333;
         }
 
-        /* 页面标题样式 */
         h1 {
             text-align: center;
-            margin-top: 20px;
+            margin: 20px 0;
             font-size: 2.5em;
         }
 
-        /* 表单容器 */
+        /* 表单容器样式 */
         .form-container {
             width: 90%;
             max-width: 1000px;
@@ -30,49 +29,49 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        /* 表单行样式 */
-        .form-row {
             display: flex;
             flex-wrap: wrap;
+            gap: 20px;
             justify-content: space-between;
-            margin-bottom: 15px;
         }
 
-        /* 标签和输入框 */
-        .form-row label {
+        .form-container .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-container label {
             font-weight: bold;
             margin-right: 5px;
-            flex: 1;
-            min-width: 120px;
         }
 
-        .form-row input,
-        .form-row select {
-            flex: 2;
+        .form-container input,
+        .form-container select {
             padding: 8px;
             font-size: 1em;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box;
+            flex-grow: 1;
             min-width: 150px;
         }
 
-        /* 添加按钮样式 */
         .add-button {
-            background-color: #dc3545;
-            color: #fff;
-            font-size: 1.1em;
+            background-color: #007bff;
+            color: white;
+            font-size: 1em;
+            padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            padding: 10px 20px;
             cursor: pointer;
             transition: background 0.3s;
+            align-self: flex-end;
         }
 
         .add-button:hover {
-            background-color: #bd2130;
+            background-color: #0056b3;
         }
 
         /* 表格样式 */
@@ -85,25 +84,21 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        table th, table td {
+        table th,
+        table td {
             padding: 10px;
             text-align: center;
             border: 1px solid #ddd;
         }
 
         table th {
-            background-color: #fff;
-            color: #333;
-            font-size: 1.1em;
-        }
-
-        table td {
-            font-size: 1em;
+            background-color: #007bff;
+            color: white;
         }
 
         .delete-button {
             background-color: #dc3545;
-            color: #fff;
+            color: white;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
@@ -123,26 +118,33 @@
         <div class="form-row">
             <label for="chemicalName">Chemical Name:</label>
             <input type="text" id="chemicalName">
+
             <label for="chemicalType">Chemical Type:</label>
             <select id="chemicalType">
                 <option value="Solid">Solid</option>
                 <option value="Liquid">Liquid</option>
                 <option value="Fridge">Fridge</option>
             </select>
+
             <label for="purity">Purity:</label>
             <input type="text" id="purity">
+
             <label for="size">Size:</label>
             <input type="text" id="size">
         </div>
+
         <div class="form-row">
             <label for="quantity">Quantity:</label>
             <input type="number" id="quantity">
+
             <label for="date">Date:</label>
             <input type="date" id="date">
+
             <label for="recordedBy">Recorded By:</label>
             <input type="text" id="recordedBy">
+
+            <button class="add-button" onclick="addChemical()">Add Chemical</button>
         </div>
-        <button class="add-button" onclick="addChemical()">Add Chemical</button>
     </div>
 
     <!-- 表格 -->
@@ -160,11 +162,10 @@
             </tr>
         </thead>
         <tbody id="tableBody">
-            <!-- 数据行将会添加到这里 -->
+            <!-- 数据行将会动态添加到这里 -->
         </tbody>
     </table>
 
-    <!-- JavaScript 逻辑 -->
     <script>
         async function addChemical() {
             const chemicalName = document.getElementById('chemicalName').value;
