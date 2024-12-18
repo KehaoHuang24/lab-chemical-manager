@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab Chemical Management</title>
     <style>
-        /* 样式保留 */
+        /* 全局样式 */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -20,6 +20,7 @@
             font-size: 2.5em;
         }
 
+        /* 表单容器样式 */
         .form-container {
             width: 90%;
             max-width: 1000px;
@@ -34,7 +35,7 @@
             justify-content: space-between;
         }
 
-        .form-row {
+        .form-container .form-row {
             display: flex;
             flex-wrap: wrap;
             width: 100%;
@@ -73,6 +74,7 @@
             background-color: #bd2130;
         }
 
+        /* 表格样式 */
         table {
             width: 90%;
             max-width: 1000px;
@@ -107,62 +109,13 @@
         .delete-button:hover {
             background-color: #bd2130;
         }
-
-        /* 登录窗口样式 */
-        .login-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            display: none; /* 默认隐藏 */
-        }
-
-        .login-modal h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .login-modal input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .login-modal button {
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .login-modal button:hover {
-            background-color: #218838;
-        }
     </style>
 </head>
 <body>
     <h1>Dr. Wang's Lab Chemical Management System</h1>
 
-    <!-- 登录窗口 -->
-    <div class="login-modal" id="loginModal">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Login</button>
-    </div>
-
     <!-- 表单容器 -->
-    <div class="form-container" id="addChemicalForm" style="display: none;">
+    <div class="form-container">
         <div class="form-row">
             <label for="chemicalName">Chemical Name:</label>
             <input type="text" id="chemicalName">
@@ -217,49 +170,100 @@
     <script>
         const API_BASE_URL = 'https://lab-chemical-manager.onrender.com'; // 后端 API 地址
 
-        // 检查登录状态
-        function checkLogin() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (!isLoggedIn) {
-                // 显示登录窗口
-                document.getElementById('loginModal').style.display = 'block';
-                document.getElementById('addChemicalForm').style.display = 'none';
-            } else {
-                // 隐藏登录窗口
-                document.getElementById('loginModal').style.display = 'none';
-                document.getElementById('addChemicalForm').style.display = 'block';
-                loadChemicals();
-            }
-        }
-
-        // 登录函数
-        async function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        async function addChemical() {
+            const chemicalName = document.getElementById('chemicalName').value;
+            const chemicalType = document.getElementById('chemicalType').value;
+            const purity = document.getElementById('purity').value;
+            const size = document.getElementById('size').value;
+            const quantity = document.getElementById('quantity').value;
+            const date = document.getElementById('date').value;
+            const recordedBy = document.getElementById('recordedBy').value;
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                const response = await fetch(`${API_BASE_URL}/api/addChemical`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ chemicalName, chemicalType, purity, size, quantity, date, recordedBy }),
                 });
 
                 const data = await response.json();
-                if (response.ok) {
-                    // 登录成功
-                    localStorage.setItem('isLoggedIn', true);
-                    alert(data.message);
-                    checkLogin(); // 检查登录状态
-                } else {
-                    throw new Error(data.message);
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to add chemical.');
                 }
+
+                alert(data.message);
+                loadChemicals(); // 重新加载表格
+
+                // 清空表单
+                document.getElementById('chemicalName').value = '';
+                document.getElementById('chemicalType').value = 'Solid';
+                document.getElementById('purity').value = '';
+                document.getElementById('size').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('date').value = '';
+                document.getElementById('recordedBy').value = '';
             } catch (error) {
-                alert('Login failed: ' + error.message);
+                console.error('Error:', error);
+                alert('Error adding chemical: ' + error.message);
             }
         }
 
-        // 页面加载时检查登录状态
-        window.onload = checkLogin;
+        async function loadChemicals() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chemicals`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to load chemicals.');
+                }
+
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = ''; // 清空表格
+
+                data.forEach(row => {
+                    const newRow = `
+                        <tr>
+                            <td>${row.name}</td>
+                            <td>${row.type}</td>
+                            <td>${row.purity}</td>
+                            <td>${row.size}</td>
+                            <td>${row.quantity}</td>
+                            <td>${row.date}</td>
+                            <td>${row.recorded_by}</td>
+                            <td><button class="delete-button" onclick="deleteChemical(${row.id})">Delete</button></td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', newRow);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading chemicals: ' + error.message);
+            }
+        }
+
+        async function deleteChemical(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chemicals/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                alert(data.message);
+                loadChemicals(); // 重新加载表格
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete chemical. Please try again.');
+            }
+        }
+
+        window.onload = loadChemicals;
     </script>
 </body>
 </html>
