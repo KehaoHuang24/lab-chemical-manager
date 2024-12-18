@@ -70,7 +70,18 @@ app.post('/api/addChemical', (req, res) => {
 
 // 2. Get all chemicals
 app.get('/api/chemicals', (req, res) => {
-    db.all('SELECT * FROM chemicals', [], (err, rows) => {
+    const sql = `
+        SELECT * FROM chemicals
+        ORDER BY 
+            CASE
+                WHEN name GLOB '[A-Za-z]*' THEN 1
+                WHEN name GLOB '[0-9]*' THEN 2
+                ELSE 3
+            END, 
+            name COLLATE NOCASE
+    `;
+
+    db.all(sql, [], (err, rows) => {
         if (err) {
             console.error('Failed to fetch chemicals:', err.message);
             return res.status(500).json({ message: 'Internal server error. Could not fetch chemicals.' });
