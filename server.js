@@ -40,24 +40,34 @@ db.run(`
 `);
 
 // 路由：添加化学品信息
-app.post('/add-chemical', (req, res) => {
-    const { name, type, purity, size, quantity, date, recorded_by } = req.body;
-    const query = `INSERT INTO chemicals (name, type, purity, size, quantity, date, recorded_by)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    db.run(query, [name, type, purity, size, quantity, date, recorded_by], function(err) {
+app.post('/api/addChemical', (req, res) => {
+    const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
+
+    // 检查是否缺少字段
+    if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // 插入到数据库
+    const sql = `
+        INSERT INTO chemicals (chemicalName, chemicalType, purity, size, quantity, date, recordedBy)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    db.run(sql, [chemicalName, chemicalType, purity, size, quantity, date, recordedBy], function (err) {
         if (err) {
-            res.status(500).send('添加失败：' + err.message);
-        } else {
-            res.status(200).send('化学品添加成功！');
+            console.error(err);
+            return res.status(500).json({ message: 'Failed to add chemical' });
         }
+        res.status(200).json({ message: 'Chemical added successfully', id: this.lastID });
     });
 });
+
 
 // 路由：获取所有化学品数据
 app.get('/chemicals', (req, res) => {
     db.all('SELECT * FROM chemicals', [], (err, rows) => {
         if (err) {
-            res.status(500).send('获取数据失败：' + err.message);
+            res.status(500).send('Failed to obtain data：' + err.message);
         } else {
             res.json(rows);
         }
