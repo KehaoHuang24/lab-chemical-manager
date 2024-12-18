@@ -55,24 +55,23 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             flex-grow: 1;
-            max-width: 180px;
+            max-width: 150px;
             box-sizing: border-box;
         }
 
         .add-button {
-            background-color: #007bff;
-            color: white;
-            font-size: 1em;
-            padding: 10px 20px;
+            background-color: #dc3545;
+            color: #fff;
+            font-size: 1.1em;
             border: none;
             border-radius: 5px;
+            padding: 10px 20px;
             cursor: pointer;
             transition: background 0.3s;
-            align-self: flex-end;
         }
 
         .add-button:hover {
-            background-color: #0056b3;
+            background-color: #bd2130;
         }
 
         /* 表格样式 */
@@ -93,8 +92,9 @@
         }
 
         table th {
-            background-color: #007bff;
-            color: white;
+            background-color: #fff;
+            color: #333;
+            font-size: 1.1em;
         }
 
         .delete-button {
@@ -136,7 +136,7 @@
 
         <div class="form-row">
             <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity">
+            <input type="text" id="quantity">
 
             <label for="date">Date:</label>
             <input type="date" id="date">
