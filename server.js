@@ -101,5 +101,10 @@ app.delete('/api/chemicals/:id', (req, res) => {
 
 // 4. Serve the main page
 app.get('/', (req, res) => {
-   
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+});
