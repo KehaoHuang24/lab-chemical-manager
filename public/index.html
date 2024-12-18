@@ -20,6 +20,28 @@
             font-size: 2.5em;
         }
 
+        /* 顶部栏样式 */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 20px;
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        .login-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .login-button:hover {
+            background-color: #0056b3;
+        }
+
         /* 表单容器样式 */
         .form-container {
             width: 90%;
@@ -74,6 +96,11 @@
             background-color: #bd2130;
         }
 
+        .add-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
         /* 表格样式 */
         table {
             width: 90%;
@@ -109,9 +136,17 @@
         .delete-button:hover {
             background-color: #bd2130;
         }
+
+        .delete-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
+    <div class="top-bar">
+        <button class="login-button" onclick="showLogin()">Login</button>
+    </div>
     <h1>Dr. Wang's Lab Chemical Management System</h1>
 
     <!-- 表单容器 -->
@@ -144,7 +179,7 @@
             <label for="recordedBy">Recorded By:</label>
             <input type="text" id="recordedBy">
 
-            <button class="add-button" onclick="addChemical()">Add Chemical</button>
+            <button class="add-button" onclick="addChemical()" disabled>Add Chemical</button>
         </div>
     </div>
 
@@ -169,8 +204,26 @@
 
     <script>
         const API_BASE_URL = 'https://lab-chemical-manager.onrender.com'; // 后端 API 地址
+        let isLoggedIn = false;
+
+        function showLogin() {
+            const username = prompt("Enter username:");
+            const password = prompt("Enter password:");
+            if (username === "wanglab" && password === "advfoodpackaging") {
+                isLoggedIn = true;
+                alert("Login successful!");
+                document.querySelector(".add-button").disabled = false;
+                document.querySelectorAll(".delete-button").forEach(button => button.disabled = false);
+            } else {
+                alert("Invalid credentials!");
+            }
+        }
 
         async function addChemical() {
+            if (!isLoggedIn) {
+                alert("You must be logged in to add chemicals.");
+                return;
+            }
             const chemicalName = document.getElementById('chemicalName').value;
             const chemicalType = document.getElementById('chemicalType').value;
             const purity = document.getElementById('purity').value;
@@ -195,9 +248,8 @@
                 }
 
                 alert(data.message);
-                loadChemicals(); // 重新加载表格
+                loadChemicals();
 
-                // 清空表单
                 document.getElementById('chemicalName').value = '';
                 document.getElementById('chemicalType').value = 'Solid';
                 document.getElementById('purity').value = '';
@@ -221,7 +273,7 @@
                 }
 
                 const tableBody = document.getElementById('tableBody');
-                tableBody.innerHTML = ''; // 清空表格
+                tableBody.innerHTML = '';
 
                 data.forEach(row => {
                     const newRow = `
@@ -233,11 +285,17 @@
                             <td>${row.quantity}</td>
                             <td>${row.date}</td>
                             <td>${row.recorded_by}</td>
-                            <td><button class="delete-button" onclick="deleteChemical(${row.id})">Delete</button></td>
+                            <td>
+                                <button class="delete-button" onclick="deleteChemical(${row.id})" disabled>Delete</button>
+                            </td>
                         </tr>
                     `;
                     tableBody.insertAdjacentHTML('beforeend', newRow);
                 });
+
+                if (isLoggedIn) {
+                    document.querySelectorAll(".delete-button").forEach(button => button.disabled = false);
+                }
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error loading chemicals: ' + error.message);
@@ -245,6 +303,10 @@
         }
 
         async function deleteChemical(id) {
+            if (!isLoggedIn) {
+                alert("You must be logged in to delete chemicals.");
+                return;
+            }
             try {
                 const response = await fetch(`${API_BASE_URL}/api/chemicals/${id}`, {
                     method: 'DELETE',
@@ -256,7 +318,7 @@
 
                 const data = await response.json();
                 alert(data.message);
-                loadChemicals(); // 重新加载表格
+                loadChemicals();
             } catch (error) {
                 console.error('Error:', error);
                 alert('Failed to delete chemical. Please try again.');
