@@ -110,6 +110,18 @@
             background-color: #bd2130;
         }
     </style>
+        <script>
+        // 登录状态检查
+        window.onload = function() {
+            if (!localStorage.getItem('auth')) {
+                // 未登录则跳转到登录页面
+                window.location.href = '/login.html';
+            } else {
+                // 已登录则加载化学品数据
+                loadChemicals();
+            }
+        };
+    </script>
 </head>
 <body>
     <h1>Dr. Wang's Lab Chemical Management System</h1>
