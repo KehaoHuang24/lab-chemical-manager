@@ -168,6 +168,9 @@
     </table>
 
     <script>
+        
+const API_BASE_URL = 'https://lab-chemical-manager.onrender.com';
+
 async function addChemical() {
     const chemicalName = document.getElementById('chemicalName').value;
     const chemicalType = document.getElementById('chemicalType').value;
@@ -177,69 +180,42 @@ async function addChemical() {
     const date = document.getElementById('date').value;
     const recordedBy = document.getElementById('recordedBy').value;
 
-    console.log('Submitting data:', {
-        chemicalName,
-        chemicalType,
-        purity,
-        size,
-        quantity,
-        date,
-        recordedBy,
-    });
-
     try {
-        const response = await fetch('https://lab-chemical-manager.onrender.com/api/addChemical', {
+        const response = await fetch(`${API_BASE_URL}/api/addChemical`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                chemicalName,
-                chemicalType,
-                purity,
-                size,
-                quantity,
-                date,
-                recordedBy,
-            }),
+            body: JSON.stringify({ chemicalName, chemicalType, purity, size, quantity, date, recordedBy }),
         });
 
         const data = await response.json();
-        console.log('Response data:', data);
 
-        if (response.ok) {
-            alert(data.message); // 成功提示
-            loadChemicals(); // 重新加载表格
-        } else {
-            alert(`Failed to add chemical: ${data.message}`);
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to add chemical.');
         }
+
+        alert(data.message); // 成功提示
+        loadChemicals(); // 重新加载表格
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to add chemical.');
+        alert('Error adding chemical: ' + error.message);
     }
-}
 
+}
 
 async function loadChemicals() {
     try {
-        const response = await fetch('https://lab-chemical-manager.onrender.com/api/chemicals');
-        if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
-        }
-
+        const response = await fetch(`${API_BASE_URL}/api/chemicals`);
         const data = await response.json();
 
-        // 根据 chemicalName 的首字母排序（忽略大小写）
-        data.sort((a, b) => {
-            const nameA = a.chemicalName.toLowerCase();
-            const nameB = b.chemicalName.toLowerCase();
-            return nameA.localeCompare(nameB);
-        });
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to load chemicals.');
+        }
 
         const tableBody = document.getElementById('tableBody');
         tableBody.innerHTML = ''; // 清空表格
 
-        // 渲染排序后的数据
         data.forEach(row => {
             const newRow = `
                 <tr>
@@ -257,9 +233,10 @@ async function loadChemicals() {
         });
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to load chemicals. Please try again later.');
+        alert('Error loading chemicals: ' + error.message);
     }
 }
+
 
 
         async function deleteChemical(id) {
