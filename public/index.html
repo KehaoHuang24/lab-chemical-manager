@@ -166,46 +166,101 @@
 
     <!-- JavaScript 逻辑 -->
     <script>
-        function addChemical() {
-            // 获取输入的值
-            const chemicalName = document.getElementById('chemicalName').value;
-            const chemicalType = document.getElementById('chemicalType').value;
-            const purity = document.getElementById('purity').value;
-            const size = document.getElementById('size').value;
-            const quantity = document.getElementById('quantity').value;
-            const date = document.getElementById('date').value;
-            const recordedBy = document.getElementById('recordedBy').value;
+       function addChemical() {
+    // 获取输入的值
+    const chemicalName = document.getElementById('chemicalName').value;
+    const chemicalType = document.getElementById('chemicalType').value;
+    const purity = document.getElementById('purity').value;
+    const size = document.getElementById('size').value;
+    const quantity = document.getElementById('quantity').value;
+    const date = document.getElementById('date').value;
+    const recordedBy = document.getElementById('recordedBy').value;
 
-            // 表格 body
+    // 将数据发送到后端
+    fetch('http://localhost:3000/api/addChemical', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            chemicalName,
+            chemicalType,
+            purity,
+            size,
+            quantity,
+            date,
+            recordedBy,
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message); // 显示成功消息
+            loadChemicals(); // 重新加载表格
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to add chemical.');
+        });
+
+    // 清空输入框
+    document.getElementById('chemicalName').value = '';
+    document.getElementById('chemicalType').value = '';
+    document.getElementById('purity').value = '';
+    document.getElementById('size').value = '';
+    document.getElementById('quantity').value = '';
+    document.getElementById('date').value = '';
+    document.getElementById('recordedBy').value = '';
+}
+
+function loadChemicals() {
+    // 从后端获取化学试剂数据
+    fetch('http://localhost:3000/api/chemicals')
+        .then(response => response.json())
+        .then(data => {
             const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // 清空表格
 
-            // 创建新行
-            const row = tableBody.insertRow();
-            row.innerHTML = `
-                <td>${chemicalName}</td>
-                <td>${chemicalType}</td>
-                <td>${purity}</td>
-                <td>${size}</td>
-                <td>${quantity}</td>
-                <td>${date}</td>
-                <td>${recordedBy}</td>
-                <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
-            `;
+            data.forEach(row => {
+                const newRow = `
+                    <tr>
+                        <td>${row.chemicalName}</td>
+                        <td>${row.chemicalType}</td>
+                        <td>${row.purity}</td>
+                        <td>${row.size}</td>
+                        <td>${row.quantity}</td>
+                        <td>${row.date}</td>
+                        <td>${row.recordedBy}</td>
+                        <td><button class="delete-button" onclick="deleteChemical(${row.id})">Delete</button></td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', newRow);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load chemicals.');
+        });
+}
 
-            // 清空输入框
-            document.getElementById('chemicalName').value = '';
-            document.getElementById('chemicalType').value = '';
-            document.getElementById('purity').value = '';
-            document.getElementById('size').value = '';
-            document.getElementById('quantity').value = '';
-            document.getElementById('date').value = '';
-            document.getElementById('recordedBy').value = '';
-        }
+function deleteChemical(id) {
+    // 向后端发送删除请求
+    fetch(`http://localhost:3000/api/chemicals/${id}`, {
+        method: 'DELETE',
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message); // 显示成功消息
+            loadChemicals(); // 重新加载表格
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete chemical.');
+        });
+}
 
-        // 删除行的函数
-        function deleteRow(button) {
-            const row = button.parentElement.parentElement;
-            row.remove();
+// 页面加载时自动加载表格数据
+window.onload = loadChemicals;
+
         }
     </script>
 </body>
