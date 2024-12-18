@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Chemical Management</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        /* 页面标题样式 */
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2.5em;
+        }
+
+        /* 表单容器 */
+        .form-container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 输入框和选择框 */
+        .form-container input,
+        .form-container select {
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* 表单布局 */
+        .form-container input[type="text"],
+        .form-container input[type="number"],
+        .form-container input[type="date"],
+        .form-container select {
+            width: 150px;
+        }
+
+        .form-container label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* 添加按钮样式 */
+        .add-button {
+            background-color: #dc3545;
+            color: #fff;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-button:hover {
+            background-color: #bd2130;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #fff;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        table td {
+            font-size: 1em;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .delete-button:hover {
+            background-color: #bd2130;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dr. Wang's Lab Chemical Management System</h1>
+
+    <!-- 表单容器 -->
+    <div class="form-container">
+        <label for="chemicalName">Chemical Name:</label>
+        <input type="text" id="chemicalName">
+
+        <label for="chemicalType">Chemical Type:</label>
+        <select id="chemicalType">
+            <option value="Solid">Solid</option>
+            <option value="Liquid">Liquid</option>
+            <option value="Fridge">Fridge</option>
+        </select>
+
+        <label for="purity">Purity:</label>
+        <input type="text" id="purity">
+
+        <label for="size">Size:</label>
+        <input type="text" id="size">
+
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity">
+
+        <label for="date">Date:</label>
+        <input type="date" id="date">
+
+        <label for="recordedBy">Recorded By:</label>
+        <input type="text" id="recordedBy">
+
+        <button class="add-button" onclick="addChemical()">Add Chemical</button>
+    </div>
+
+    <!-- 表格 -->
+    <table>
+        <thead>
+            <tr>
+                <th>Chemical Name</th>
+                <th>Chemical Type</th>
+                <th>Purity</th>
+                <th>Size</th>
+                <th>Quantity</th>
+                <th>Date</th>
+                <th>Recorded By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- 数据行将会添加到这里 -->
+        </tbody>
+    </table>
+
+    <!-- JavaScript 逻辑 -->
+    <script>
+        function addChemical() {
+            // 获取输入的值
+            const chemicalName = document.getElementById('chemicalName').value;
+            const chemicalType = document.getElementById('chemicalType').value;
+            const purity = document.getElementById('purity').value;
+            const size = document.getElementById('size').value;
+            const quantity = document.getElementById('quantity').value;
+            const date = document.getElementById('date').value;
+            const recordedBy = document.getElementById('recordedBy').value;
+
+            // 表格 body
+            const tableBody = document.getElementById('tableBody');
+
+            // 创建新行
+            const row = tableBody.insertRow();
+            row.innerHTML = `
+                <td>${chemicalName}</td>
+                <td>${chemicalType}</td>
+                <td>${purity}</td>
+                <td>${size}</td>
+                <td>${quantity}</td>
+                <td>${date}</td>
+                <td>${recordedBy}</td>
+                <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
+            `;
+
+            // 清空输入框
+            document.getElementById('chemicalName').value = '';
+            document.getElementById('chemicalType').value = '';
+            document.getElementById('purity').value = '';
+            document.getElementById('size').value = '';
+            document.getElementById('quantity').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('recordedBy').value = '';
+        }
+
+        // 删除行的函数
+        function deleteRow(button) {
+            const row = button.parentElement.parentElement;
+            row.remove();
+        }
+    </script>
+</body>
+</html>
