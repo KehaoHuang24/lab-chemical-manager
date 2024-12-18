@@ -216,37 +216,47 @@
             document.getElementById('recordedBy').value = '';
         }
 
-        async function loadChemicals() {
-            try {
-                const response = await fetch('https://lab-chemical-manager.onrender.com/api/chemicals');
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const tableBody = document.getElementById('tableBody');
-                tableBody.innerHTML = ''; // 清空表格
-
-                data.forEach(row => {
-                    const newRow = `
-                        <tr>
-                            <td>${row.chemicalName}</td>
-                            <td>${row.chemicalType}</td>
-                            <td>${row.purity}</td>
-                            <td>${row.size}</td>
-                            <td>${row.quantity}</td>
-                            <td>${row.date}</td>
-                            <td>${row.recordedBy}</td>
-                            <td><button class="delete-button" onclick="deleteChemical(${row.id})">Delete</button></td>
-                        </tr>
-                    `;
-                    tableBody.insertAdjacentHTML('beforeend', newRow);
-                });
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to load chemicals. Please try again later.');
-            }
+async function loadChemicals() {
+    try {
+        const response = await fetch('https://lab-chemical-manager.onrender.com/api/chemicals');
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
         }
+
+        const data = await response.json();
+
+        // 根据 chemicalName 的首字母排序（忽略大小写）
+        data.sort((a, b) => {
+            const nameA = a.chemicalName.toLowerCase();
+            const nameB = b.chemicalName.toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = ''; // 清空表格
+
+        // 渲染排序后的数据
+        data.forEach(row => {
+            const newRow = `
+                <tr>
+                    <td>${row.chemicalName}</td>
+                    <td>${row.chemicalType}</td>
+                    <td>${row.purity}</td>
+                    <td>${row.size}</td>
+                    <td>${row.quantity}</td>
+                    <td>${row.date}</td>
+                    <td>${row.recordedBy}</td>
+                    <td><button class="delete-button" onclick="deleteChemical(${row.id})">Delete</button></td>
+                </tr>
+            `;
+            tableBody.insertAdjacentHTML('beforeend', newRow);
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load chemicals. Please try again later.');
+    }
+}
+
 
         async function deleteChemical(id) {
             try {
