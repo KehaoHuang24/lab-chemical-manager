@@ -168,80 +168,85 @@
     </table>
 
     <script>
-        
-const API_BASE_URL = 'https://lab-chemical-manager.onrender.com';
+        const API_BASE_URL = 'http://localhost:4000'; // 后端 API 地址
 
-async function addChemical() {
-    const chemicalName = document.getElementById('chemicalName').value;
-    const chemicalType = document.getElementById('chemicalType').value;
-    const purity = document.getElementById('purity').value;
-    const size = document.getElementById('size').value;
-    const quantity = document.getElementById('quantity').value;
-    const date = document.getElementById('date').value;
-    const recordedBy = document.getElementById('recordedBy').value;
+        async function addChemical() {
+            const chemicalName = document.getElementById('chemicalName').value;
+            const chemicalType = document.getElementById('chemicalType').value;
+            const purity = document.getElementById('purity').value;
+            const size = document.getElementById('size').value;
+            const quantity = document.getElementById('quantity').value;
+            const date = document.getElementById('date').value;
+            const recordedBy = document.getElementById('recordedBy').value;
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/addChemical`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ chemicalName, chemicalType, purity, size, quantity, date, recordedBy }),
-        });
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/addChemical`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ chemicalName, chemicalType, purity, size, quantity, date, recordedBy }),
+                });
 
-        const data = await response.json();
+                const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to add chemical.');
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to add chemical.');
+                }
+
+                alert(data.message);
+                loadChemicals(); // 重新加载表格
+
+                // 清空表单
+                document.getElementById('chemicalName').value = '';
+                document.getElementById('chemicalType').value = 'Solid';
+                document.getElementById('purity').value = '';
+                document.getElementById('size').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('date').value = '';
+                document.getElementById('recordedBy').value = '';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding chemical: ' + error.message);
+            }
         }
 
-        alert(data.message); // 成功提示
-        loadChemicals(); // 重新加载表格
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error adding chemical: ' + error.message);
-    }
+        async function loadChemicals() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chemicals`);
+                const data = await response.json();
 
-}
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to load chemicals.');
+                }
 
-async function loadChemicals() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/chemicals`);
-        const data = await response.json();
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = ''; // 清空表格
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to load chemicals.');
+                data.forEach(row => {
+                    const newRow = `
+                        <tr>
+                            <td>${row.name}</td>
+                            <td>${row.type}</td>
+                            <td>${row.purity}</td>
+                            <td>${row.size}</td>
+                            <td>${row.quantity}</td>
+                            <td>${row.date}</td>
+                            <td>${row.recorded_by}</td>
+                            <td><button class="delete-button" onclick="deleteChemical(${row.id})">Delete</button></td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', newRow);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading chemicals: ' + error.message);
+            }
         }
-
-        const tableBody = document.getElementById('tableBody');
-        tableBody.innerHTML = ''; // 清空表格
-
-        data.forEach(row => {
-            const newRow = `
-                <tr>
-                    <td>${row.chemicalName}</td>
-                    <td>${row.chemicalType}</td>
-                    <td>${row.purity}</td>
-                    <td>${row.size}</td>
-                    <td>${row.quantity}</td>
-                    <td>${row.date}</td>
-                    <td>${row.recordedBy}</td>
-                    <td><button class="delete-button" onclick="deleteChemical(${row.id})">Delete</button></td>
-                </tr>
-            `;
-            tableBody.insertAdjacentHTML('beforeend', newRow);
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error loading chemicals: ' + error.message);
-    }
-}
-
-
 
         async function deleteChemical(id) {
             try {
-                const response = await fetch(`https://lab-chemical-manager.onrender.com/api/chemicals/${id}`, {
+                const response = await fetch(`${API_BASE_URL}/api/chemicals/${id}`, {
                     method: 'DELETE',
                 });
 
@@ -250,7 +255,7 @@ async function loadChemicals() {
                 }
 
                 const data = await response.json();
-                alert(data.message); // 显示成功消息
+                alert(data.message);
                 loadChemicals(); // 重新加载表格
             } catch (error) {
                 console.error('Error:', error);
