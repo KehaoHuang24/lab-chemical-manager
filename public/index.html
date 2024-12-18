@@ -111,6 +111,12 @@
         }
     </style>
         <script>
+// 检查登录状态
+if (!localStorage.getItem('isLoggedIn')) {
+    // 如果没有登录状态，重定向到登录页面
+    window.location.href = 'login.html';
+}
+            
         // 登录状态检查
         window.onload = function() {
             if (!localStorage.getItem('auth')) {
