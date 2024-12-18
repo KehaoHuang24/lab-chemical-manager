@@ -168,53 +168,57 @@
     </table>
 
     <script>
-        async function addChemical() {
-            const chemicalName = document.getElementById('chemicalName').value;
-            const chemicalType = document.getElementById('chemicalType').value;
-            const purity = document.getElementById('purity').value;
-            const size = document.getElementById('size').value;
-            const quantity = document.getElementById('quantity').value;
-            const date = document.getElementById('date').value;
-            const recordedBy = document.getElementById('recordedBy').value;
+async function addChemical() {
+    const chemicalName = document.getElementById('chemicalName').value;
+    const chemicalType = document.getElementById('chemicalType').value;
+    const purity = document.getElementById('purity').value;
+    const size = document.getElementById('size').value;
+    const quantity = document.getElementById('quantity').value;
+    const date = document.getElementById('date').value;
+    const recordedBy = document.getElementById('recordedBy').value;
 
-            try {
-                const response = await fetch('https://lab-chemical-manager.onrender.com/api/addChemical', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chemicalName,
-                        chemicalType,
-                        purity,
-                        size,
-                        quantity,
-                        date,
-                        recordedBy,
-                    }),
-                });
+    console.log('Submitting data:', {
+        chemicalName,
+        chemicalType,
+        purity,
+        size,
+        quantity,
+        date,
+        recordedBy,
+    });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
+    try {
+        const response = await fetch('https://lab-chemical-manager.onrender.com/api/addChemical', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chemicalName,
+                chemicalType,
+                purity,
+                size,
+                quantity,
+                date,
+                recordedBy,
+            }),
+        });
 
-                const data = await response.json();
-                alert(data.message); // 显示成功消息
-                loadChemicals(); // 重新加载表格
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to add chemical. Please check your inputs and try again.');
-            }
+        const data = await response.json();
+        console.log('Response data:', data);
 
-            // 清空输入框
-            document.getElementById('chemicalName').value = '';
-            document.getElementById('chemicalType').value = '';
-            document.getElementById('purity').value = '';
-            document.getElementById('size').value = '';
-            document.getElementById('quantity').value = '';
-            document.getElementById('date').value = '';
-            document.getElementById('recordedBy').value = '';
+        if (response.ok) {
+            alert(data.message); // 成功提示
+            loadChemicals(); // 重新加载表格
+        } else {
+            alert(`Failed to add chemical: ${data.message}`);
         }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to add chemical.');
+    }
+}
+
 
 async function loadChemicals() {
     try {
