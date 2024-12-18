@@ -1,22 +1,19 @@
-// 引入所需模块
-const express = require('express');      // 引入 Express 框架
-const sqlite3 = require('sqlite3').verbose(); // 引入 SQLite3 数据库
-const bodyParser = require('body-parser'); // 引入 body-parser 解析请求数据
-const cors = require('cors');            // 引入 CORS 中间件
-const path = require('path');            // 引入 path 模块，用于处理文件路径
+const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const path = require('path');
 
-const app = express();                  // 创建 Express 实例
-const port = process.env.PORT || 4000;  // 动态设置服务器端口号（适用于 Render 等云服务）
+const app = express();
+const port = process.env.PORT || 4000;
 
-// 使用中间件
-app.use(cors()); // 允许跨域请求
+// 中间件
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// 设置静态文件目录，指向前端代码所在的 public 文件夹
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 连接 SQLite 数据库（如果不存在会自动创建）
+// 连接数据库
 const db = new sqlite3.Database('./chemicals.db', (err) => {
     if (err) {
         console.error('无法连接数据库:', err.message);
@@ -25,7 +22,7 @@ const db = new sqlite3.Database('./chemicals.db', (err) => {
     }
 });
 
-// 初始化数据库表格
+// 初始化数据库表
 db.run(`
     CREATE TABLE IF NOT EXISTS chemicals (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,18 +36,16 @@ db.run(`
     )
 `);
 
-// 路由：添加化学品信息
+// 添加化学品
 app.post('/api/addChemical', (req, res) => {
     const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
 
-    // 检查是否缺少字段
     if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // 插入到数据库
     const sql = `
-        INSERT INTO chemicals (chemicalName, chemicalType, purity, size, quantity, date, recordedBy)
+        INSERT INTO chemicals (name, type, purity, size, quantity, date, recorded_by)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     db.run(sql, [chemicalName, chemicalType, purity, size, quantity, date, recordedBy], function (err) {
@@ -62,19 +57,35 @@ app.post('/api/addChemical', (req, res) => {
     });
 });
 
-
-// 路由：获取所有化学品数据
-app.get('/chemicals', (req, res) => {
+// 获取化学品列表
+app.get('/api/chemicals', (req, res) => {
     db.all('SELECT * FROM chemicals', [], (err, rows) => {
         if (err) {
-            res.status(500).send('Failed to obtain data：' + err.message);
+            res.status(500).json({ message: 'Failed to fetch chemicals', error: err.message });
         } else {
             res.json(rows);
         }
     });
 });
 
-// 路由：处理根路径 `/`
+// 删除化学品
+app.delete('/api/chemicals/:id', (req, res) => {
+    const { id } = req.params;
+
+    const sql = `DELETE FROM chemicals WHERE id = ?`;
+    db.run(sql, [id], function (err) {
+        if (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Failed to delete chemical' });
+        } else if (this.changes === 0) {
+            res.status(404).json({ message: 'Chemical not found' });
+        } else {
+            res.json({ message: 'Chemical deleted successfully' });
+        }
+    });
+});
+
+// 处理根路径
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
