@@ -43,10 +43,41 @@ db.run(`
     }
 });
 
+// Simulated user database (for simplicity, no actual user database is used here)
+const USER = { username: 'wanglab', password: 'advfoodpackaging' };
+
+// Middleware for authentication
+let isAuthenticated = false; // Tracks login state on the server
+
+const requireAuth = (req, res, next) => {
+    if (!isAuthenticated) {
+        return res.status(401).json({ message: 'Unauthorized. Please log in first.' });
+    }
+    next();
+};
+
 // API Endpoints
 
-// 1. Add a new chemical
-app.post('/api/addChemical', (req, res) => {
+// 1. User Login
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    if (username === USER.username && password === USER.password) {
+        isAuthenticated = true;
+        res.status(200).json({ message: 'Login successful.' });
+    } else {
+        res.status(401).json({ message: 'Invalid username or password.' });
+    }
+});
+
+// 2. User Logout
+app.post('/api/logout', (req, res) => {
+    isAuthenticated = false;
+    res.status(200).json({ message: 'Logout successful.' });
+});
+
+// 3. Add a new chemical (protected)
+app.post('/api/addChemical', requireAuth, (req, res) => {
     const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
 
     // Validate fields
@@ -68,7 +99,7 @@ app.post('/api/addChemical', (req, res) => {
     });
 });
 
-// 2. Get all chemicals
+// 4. Get all chemicals (unprotected, available for all)
 app.get('/api/chemicals', (req, res) => {
     const sql = `
         SELECT * FROM chemicals
@@ -90,8 +121,8 @@ app.get('/api/chemicals', (req, res) => {
     });
 });
 
-// 3. Delete a chemical
-app.delete('/api/chemicals/:id', (req, res) => {
+// 5. Delete a chemical (protected)
+app.delete('/api/chemicals/:id', requireAuth, (req, res) => {
     const { id } = req.params;
 
     // Delete the chemical by ID
@@ -110,7 +141,7 @@ app.delete('/api/chemicals/:id', (req, res) => {
     });
 });
 
-// 4. Serve the main page
+// 6. Serve the main page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
