@@ -1,6 +1,6 @@
 // Import necessary modules
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
@@ -14,19 +14,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize SQLite database
-const db = new sqlite3.Database('./chemicals.db', (err) => {
-    if (err) {
-        console.error('Failed to connect to the database:', err.message);
-    } else {
-        console.log('Successfully connected to the SQLite database.');
-    }
+// PostgreSQL Database Configuration
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL, // Render PostgreSQL environment variable
+    ssl: {
+        rejectUnauthorized: false, // Required for Render PostgreSQL
+    },
 });
 
-// Create database table if it doesn't exist
-db.run(`
+// Initialize Database Table
+pool.query(`
     CREATE TABLE IF NOT EXISTS chemicals (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         purity TEXT,
@@ -45,77 +44,52 @@ db.run(`
 
 // API Endpoints
 
-// 1. Add a new chemical
-app.post('/api/addChemical', (req, res) => {
+// Add a new chemical
+app.post('/api/addChemical', async (req, res) => {
     const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
 
-    // Validate fields
     if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
         return res.status(400).json({ message: 'Missing required fields. Please fill out all fields.' });
     }
 
-    // Insert into the database
-    const sql = `
-        INSERT INTO chemicals (name, type, purity, size, quantity, date, recorded_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-    db.run(sql, [chemicalName, chemicalType, purity, size, quantity, date, recordedBy], function (err) {
-        if (err) {
-            console.error('Failed to add chemical:', err.message);
-            return res.status(500).json({ message: 'Internal server error. Could not add chemical.' });
-        }
-        res.status(200).json({ message: 'Chemical added successfully!', id: this.lastID });
-    });
+    try {
+        await pool.query(
+            `INSERT INTO chemicals (name, type, purity, size, quantity, date, recorded_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [chemicalName, chemicalType, purity, size, quantity, date, recordedBy]
+        );
+        res.json({ message: 'Chemical added successfully!' });
+    } catch (err) {
+        console.error('Error adding chemical:', err.message);
+        res.status(500).json({ message: 'Error adding chemical.' });
+    }
 });
 
-// 2. Get all chemicals
-app.get('/api/chemicals', (req, res) => {
-    const sql = `
-        SELECT * FROM chemicals
-        ORDER BY 
-            CASE
-                WHEN name GLOB '[A-Za-z]*' THEN 1
-                WHEN name GLOB '[0-9]*' THEN 2
-                ELSE 3
-            END, 
-            name COLLATE NOCASE
-    `;
-
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            console.error('Failed to fetch chemicals:', err.message);
-            return res.status(500).json({ message: 'Internal server error. Could not fetch chemicals.' });
-        }
-        res.status(200).json(rows);
-    });
+// Get all chemicals
+app.get('/api/chemicals', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM chemicals');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error retrieving chemicals:', err.message);
+        res.status(500).json({ message: 'Error retrieving chemicals.' });
+    }
 });
 
-// 3. Delete a chemical
-app.delete('/api/chemicals/:id', (req, res) => {
+// Delete a chemical
+app.delete('/api/chemicals/:id', async (req, res) => {
     const { id } = req.params;
 
-    // Delete the chemical by ID
-    const sql = `DELETE FROM chemicals WHERE id = ?`;
-    db.run(sql, [id], function (err) {
-        if (err) {
-            console.error('Failed to delete chemical:', err.message);
-            return res.status(500).json({ message: 'Internal server error. Could not delete chemical.' });
-        }
-
-        if (this.changes === 0) {
-            return res.status(404).json({ message: 'Chemical not found.' });
-        }
-
-        res.status(200).json({ message: 'Chemical deleted successfully!' });
-    });
+    try {
+        await pool.query('DELETE FROM chemicals WHERE id = $1', [id]);
+        res.json({ message: 'Chemical deleted successfully!' });
+    } catch (err) {
+        console.error('Error deleting chemical:', err.message);
+        res.status(500).json({ message: 'Error deleting chemical.' });
+    }
 });
 
-// 4. Serve the main page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Start the server
+// Start Server
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });
