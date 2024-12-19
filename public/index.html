@@ -19,7 +19,7 @@
             font-size: 2.5em;
         }
 
-        .form-container {
+        .form-section {
             width: 90%;
             max-width: 1000px;
             margin: 20px auto;
@@ -27,35 +27,28 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: none;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
         }
 
-        .form-container .form-row {
+        .form-row {
             display: flex;
             flex-wrap: wrap;
-            width: 100%;
             gap: 10px;
             align-items: center;
         }
 
-        .form-container label {
+        .form-row label {
             font-weight: bold;
-            margin-right: 5px;
         }
 
-        .form-container input,
-        .form-container select {
+        .form-row input,
+        .form-row select {
+            width: 130px;
             padding: 8px;
+            margin-bottom: 15px;
             font-size: 1em;
             border: 1px solid #ddd;
             border-radius: 4px;
-            flex-grow: 1;
-            max-width: 150px;
-            box-sizing: border-box;
-        }
+          }
 
         .add-button {
             background-color: #28a745;
@@ -63,7 +56,7 @@
             font-size: 1.1em;
             border: none;
             border-radius: 5px;
-            padding: 10px 20px;
+            padding: 8px 15px;
             cursor: pointer;
             transition: background 0.3s;
         }
@@ -81,19 +74,38 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        table th,
-        table td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
+       table th,
+table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+    max-width: 150px; /* 设置单元格最大宽度 */
+    overflow: hidden; /* 隐藏溢出内容 */
+    text-overflow: ellipsis; /* 使用省略号表示溢出的内容 */
+    white-space: nowrap; /* 避免自动换行 */
+}
 
-        table th {
-            background-color: #f1f1f1;
-            color: #333;
-            font-size: 1.1em;
-        }
+table th {
+    background-color: #f1f1f1;
+    color: #333;
+    font-size: 1.1em;
+}
 
+td.long-text {
+    max-width: 200px; /* 限制列宽度 */
+    white-space: nowrap; /* 禁止换行 */
+    overflow: hidden; /* 超出内容隐藏 */
+    text-overflow: ellipsis; /* 添加省略号 */
+    cursor: pointer; /* 鼠标悬停时显示手形 */
+    color: #007bff; /* 链接样式 */
+    text-decoration: underline;
+}
+
+td.long-text:hover {
+    text-decoration: none; /* 悬停时去掉下划线 */
+    color: #0056b3;
+}
+       
         .delete-button {
             background-color: #dc3545;
             color: white;
@@ -121,16 +133,6 @@
             flex-direction: column;
             gap: 10px;
             width: 300px;
-        }
-
-        #loginModal form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        #loginModal label {
-            font-weight: bold;
         }
 
         #loginModal input {
@@ -163,7 +165,61 @@
 
     <h1 style="display: none;">Lab Chemical Management System</h1>
 
-    <div class="form-container">
+    <div class="form-section" style="display: none;">
+        <h2>Order Chemicals</h2>
+        <div class="form-row">
+            <label for="orderChemical">Chemical:</label>
+            <input type="text" id="orderChemical">
+
+            <label for="catalogNumber">Catalog Number:</label>
+            <input type="text" id="catalogNumber">
+
+            <label for="orderSize">Size:</label>
+            <input type="text" id="orderSize">
+
+            <label for="orderQuantity">Quantity:</label>
+            <input type="text" id="orderQuantity">
+        </div>
+
+        <div class="form-row">
+            <label for="price">Price:</label>
+            <input type="text" id="price">
+
+
+
+            <label for="requestedBy">Requested By:</label>
+            <input type="text" id="requestedBy">
+
+            <label for="website">Website:</label>
+            <input type="text" id="website">
+        </div>
+
+         <div class="form-row">
+            <button class="add-button" onclick="addOrder()">Add Order</button>
+            <button class="add-button" onclick="exportTableToCSV('orders.csv', 'orderTable')">Export Orders</button>
+        </div>
+    </div>
+
+    <table id="orderTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>Chemical</th>
+                <th>Catalog Number</th>
+                <th>Size</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Requested By</th>
+                <th>Website</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="orderTableBody">
+            <!-- Dynamic rows will be added here -->
+        </tbody>
+    </table>
+
+    <div class="form-section" style="display: none;">
+        <h2>Register Chemicals</h2>
         <div class="form-row">
             <label for="chemicalName">Chemical Name:</label>
             <input type="text" id="chemicalName">
@@ -191,12 +247,16 @@
 
             <label for="recordedBy">Recorded By:</label>
             <input type="text" id="recordedBy">
-
-            <button class="add-button" onclick="addChemical()">Add Chemical</button>
         </div>
+        
+        <div class="form-row">
+            <button class="add-button" onclick="addChemical()">Add Chemical</button>
+            <button class="add-button" onclick="exportTableToCSV('chemicals.csv', 'chemicalTable')">Export Chemicals</button>
+        </div>
+        
     </div>
 
-    <table style="display: none;">
+    <table id="chemicalTable" style="display: none;">
         <thead>
             <tr>
                 <th>Chemical Name</th>
@@ -209,93 +269,168 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="tableBody">
+        <tbody id="chemicalTableBody">
             <!-- Dynamic rows will be added here -->
         </tbody>
     </table>
 
 <script>
-        const API_BASE_URL = 'https://lab-chemical-manager-1.onrender.com'; // 替换为您的后端地址
+    const API_BASE_URL = 'https://lab-chemical-manager-1.onrender.com';
 
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+    function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
 
-            if (username === 'wanglab' && password === 'advfoodpackaging') {
-                document.getElementById('loginModal').style.display = 'none';
-                document.querySelector('h1').style.display = 'block';
-                document.querySelector('.form-container').style.display = 'flex';
-                document.querySelector('table').style.display = 'table';
-                loadChemicals();
-            } else {
-                alert('Invalid credentials!');
-            }
+        if (username === 'wanglab' && password === 'advfoodpackaging') {
+            document.getElementById('loginModal').style.display = 'none';
+            document.querySelector('h1').style.display = 'block';
+
+            const sections = document.querySelectorAll('.form-section');
+            sections.forEach(section => section.style.display = 'block');
+
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => table.style.display = 'table');
+        } else {
+            alert('Invalid username or password!');
+        }
+    }
+
+function addOrder() {
+    const chemical = document.getElementById('orderChemical').value;
+    const catalogNumber = document.getElementById('catalogNumber').value;
+    const size = document.getElementById('orderSize').value;
+    const quantity = document.getElementById('orderQuantity').value;
+    const price = document.getElementById('price').value;
+    const requestedBy = document.getElementById('requestedBy').value;
+    const website = document.getElementById('website').value;
+
+    if (!chemical || !catalogNumber || !size || !quantity || !price || !requestedBy || !website) {
+        alert('All fields must be filled!');
+        return;
+    }
+
+    const tableBody = document.getElementById('orderTableBody');
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+        <td>${chemical}</td>
+        <td>${catalogNumber}</td>
+        <td>${size}</td>
+        <td>${quantity}</td>
+        <td>${price}</td>
+        <td>${requestedBy}</td>
+        <td class="long-text" onclick="copyToClipboard(this)">${website}</td>
+        <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
+    `;
+
+    tableBody.appendChild(row);
+
+    clearOrderForm();
+}
+
+
+    function addChemical() {
+        const chemicalName = document.getElementById('chemicalName').value;
+        const chemicalType = document.getElementById('chemicalType').value;
+        const purity = document.getElementById('purity').value;
+        const size = document.getElementById('size').value;
+        const quantity = document.getElementById('quantity').value;
+        const date = document.getElementById('date').value;
+        const recordedBy = document.getElementById('recordedBy').value;
+
+        if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
+            alert('All fields must be filled!');
+            return;
         }
 
-        async function addChemical() {
-            const chemicalName = document.getElementById('chemicalName').value;
-            const chemicalType = document.getElementById('chemicalType').value;
-            const purity = document.getElementById('purity').value;
-            const size = document.getElementById('size').value;
-            const quantity = document.getElementById('quantity').value;
-            const date = document.getElementById('date').value;
-            const recordedBy = document.getElementById('recordedBy').value;
+        const tableBody = document.getElementById('chemicalTableBody');
+        const row = document.createElement('tr');
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/addChemical`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chemicalName, chemicalType, purity, size, quantity, date, recordedBy }),
-                });
+        row.innerHTML = `
+            <td>${chemicalName}</td>
+            <td>${chemicalType}</td>
+            <td>${purity}</td>
+            <td>${size}</td>
+            <td>${quantity}</td>
+            <td>${date}</td>
+            <td>${recordedBy}</td>
+            <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
+        `;
 
-                if (!response.ok) throw new Error('Failed to add chemical.');
-                alert('Chemical added successfully!');
-                loadChemicals();
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message);
-            }
-        }
+        tableBody.appendChild(row);
 
-        async function loadChemicals() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/chemicals`);
-                if (!response.ok) throw new Error('Failed to load chemicals.');
-                const data = await response.json();
-                const tableBody = document.getElementById('tableBody');
-                tableBody.innerHTML = '';
-                data.forEach(row => {
-                    const newRow = `
-                        <tr>
-                            <td>${row.name}</td>
-                            <td>${row.type}</td>
-                            <td>${row.purity}</td>
-                            <td>${row.size}</td>
-                            <td>${row.quantity}</td>
-                            <td>${row.date}</td>
-                            <td>${row.recorded_by}</td>
-                            <td><button onclick="deleteChemical(${row.id})">Delete</button></td>
-                        </tr>
-                    `;
-                    tableBody.insertAdjacentHTML('beforeend', newRow);
-                });
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message);
-            }
-        }
+        clearChemicalForm();
+    }
+function exportTableToCSV(filename, tableId) {
+        const table = document.getElementById(tableId);
+        const rows = table.querySelectorAll('tr');
+        let csvContent = '';
 
-        async function deleteChemical(id) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/chemicals/${id}`, { method: 'DELETE' });
-                if (!response.ok) throw new Error('Failed to delete chemical.');
-                alert('Chemical deleted successfully!');
-                loadChemicals();
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message);
-            }
-        }
-    </script>
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('th, td');
+            const rowData = Array.from(cells)
+                .map(cell => `"${cell.textContent.trim()}"`)
+                .join(',');
+            csvContent += rowData + '\n';
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
+    function deleteRow(button) {
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+
+    function clearOrderForm() {
+        document.getElementById('orderChemical').value = '';
+        document.getElementById('catalogNumber').value = '';
+        document.getElementById('orderSize').value = '';
+        document.getElementById('orderQuantity').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('requestedBy').value = '';
+        document.getElementById('website').value = '';
+    }
+
+    function clearChemicalForm() {
+        document.getElementById('chemicalName').value = '';
+        document.getElementById('chemicalType').value = '';
+        document.getElementById('purity').value = '';
+        document.getElementById('size').value = '';
+        document.getElementById('quantity').value = '';
+        document.getElementById('date').value = '';
+        document.getElementById('recordedBy').value = '';
+    }
+    
+    function copyToClipboard(cell) {
+    const textToCopy = cell.textContent.trim();
+
+    // 创建一个临时的输入框用于复制
+    const tempInput = document.createElement('input');
+    document.body.appendChild(tempInput);
+    tempInput.value = textToCopy;
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+
+    // 显示“已复制！”提示
+    const originalText = cell.textContent;
+    cell.textContent = 'Copy！';
+    cell.style.backgroundColor = '#d4edda';
+    cell.style.color = '#155724';
+
+    setTimeout(() => {
+        cell.textContent = originalText; // 恢复原始文本
+        cell.style.backgroundColor = ''; // 恢复背景色
+        cell.style.color = ''; // 恢复文字颜色
+    }, 1500);
+}
+
+
+</script>
 </body>
 </html>
