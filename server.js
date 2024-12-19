@@ -129,7 +129,7 @@ app.post('/api/addChemical', async (req, res) => {
         // 插入数据到数据库
         const query = `
             INSERT INTO registered_chemicals 
-            (name, type, purity, size, quantity, date, recorded_by) 
+            (chemicalName, chemicalType, purity, size, quantity, date, recorded_by) 
             VALUES ($1, $2, $3, $4, $5, $6, $7) 
             RETURNING *;
         `;
