@@ -410,24 +410,29 @@ td.long-text:hover {
             recordedBy: document.getElementById('recordedBy').value
         };
 
-        fetch(`${API_BASE_URL}/api/addChemical`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(chemicalData),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);
-                    fetchChemicals();
-                    clearChemicalForm();
-                }
-            })
-            .catch(err => {
-                console.error('Error adding chemical:', err);
-                alert('Failed to add chemical.');
-            });
+fetch(`${API_BASE_URL}/api/addChemical`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(chemicalData),
+})
+.then(response => {
+    console.log('Response status:', response.status);
+    return response.json();
+})
+.then(data => {
+    if (data.message) {
+        alert(data.message);
+        fetchChemicals();
+        clearChemicalForm();
+    } else {
+        console.error('Unexpected response:', data);
     }
+})
+.catch(err => {
+    console.error('Error adding chemical:', err);
+    alert('Failed to add chemical.');
+});
+
 
     // 加载化学品
     function fetchChemicals() {
