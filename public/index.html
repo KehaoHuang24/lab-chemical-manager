@@ -277,6 +277,7 @@ td.long-text:hover {
 <script>
     const API_BASE_URL = 'https://lab-chemical-manager-1.onrender.com';
 
+    
     /* -------------------- 登录功能 -------------------- */
     function login() {
         const username = document.getElementById('username').value;
@@ -433,6 +434,7 @@ fetch(`${API_BASE_URL}/api/addChemical`, {
     alert('Failed to add chemical.');
 });
 
+    }
 
     // 加载化学品
     function fetchChemicals() {
@@ -509,32 +511,12 @@ fetch(`${API_BASE_URL}/api/addChemical`, {
         });
     }
 
-    // 导出表格到 CSV
-    function exportTableToCSV(filename, tableId) {
-    const table = document.getElementById(tableId);
-    if (!table) {
-        alert('Table not found!');
-        return;
+    // 导出表格到 Excel
+    function exportTableToExcel(filename, tableId) {
+        const table = document.getElementById(tableId);
+        const workbook = XLSX.utils.table_to_book(table);
+        XLSX.writeFile(workbook, filename);
     }
-
-    let csvContent = '';
-    const rows = table.querySelectorAll('tr');
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('th, td');
-        const rowData = Array.from(cells)
-            .map(cell => `"${cell.textContent.trim()}"`)
-            .join(',');
-        csvContent += rowData + '\n';
-    });
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-}
-
 
 
 </script>
