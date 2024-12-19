@@ -277,165 +277,118 @@ td.long-text:hover {
 <script>
     const API_BASE_URL = 'https://lab-chemical-manager-1.onrender.com';
 
+    <script>
+    const API_BASE_URL = 'https://your-backend-url.com'; // 替换为你的后端地址
+
+    /* -------------------- 登录功能 -------------------- */
     function login() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
+        // 模拟简单的登录验证
         if (username === 'wanglab' && password === 'advfoodpackaging') {
             document.getElementById('loginModal').style.display = 'none';
             document.querySelector('h1').style.display = 'block';
 
+            // 显示两个表单和表格
             const sections = document.querySelectorAll('.form-section');
             sections.forEach(section => section.style.display = 'block');
 
             const tables = document.querySelectorAll('table');
             tables.forEach(table => table.style.display = 'table');
+
+            // 加载数据
+            fetchOrders();
+            fetchChemicals();
         } else {
             alert('Invalid username or password!');
         }
     }
 
-function addOrder() {
-    const chemical = document.getElementById('orderChemical').value;
-    const catalogNumber = document.getElementById('catalogNumber').value;
-    const size = document.getElementById('orderSize').value;
-    const quantity = document.getElementById('orderQuantity').value;
-    const price = document.getElementById('price').value;
-    const requestedBy = document.getElementById('requestedBy').value;
-    const website = document.getElementById('website').value;
+    /* -------------------- 页面加载时初始化 -------------------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('loginModal').style.display = 'block';
+    });
 
-    if (!chemical || !catalogNumber || !size || !quantity || !price || !requestedBy || !website) {
-        alert('All fields must be filled!');
-        return;
-    }
+    /* ----------------------- 订单功能 ----------------------- */
 
-    const orderData = { chemical, catalogNumber, size, quantity, price, requestedBy, website };
+    // 添加订单
+    function addOrder() {
+        const orderData = {
+            chemical: document.getElementById('orderChemical').value,
+            catalogNumber: document.getElementById('catalogNumber').value,
+            size: document.getElementById('orderSize').value,
+            quantity: document.getElementById('orderQuantity').value,
+            price: document.getElementById('price').value,
+            requestedBy: document.getElementById('requestedBy').value,
+            website: document.getElementById('website').value
+        };
 
-    // API call to add order
-    fetch(`${API_BASE_URL}/api/addOrder`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert(data.message);
-                fetchOrders(); // Reload orders table after adding
-                clearOrderForm();
-            }
+        fetch(`${API_BASE_URL}/api/addOrder`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData),
         })
-        .catch(err => {
-            console.error('Error adding order:', err);
-            alert('Failed to add order.');
-        });
-}
-
-    function fetchOrders() {
-    fetch(`${API_BASE_URL}/api/orders`)
-        .then(response => response.json())
-        .then(orders => {
-            const tableBody = document.getElementById('orderTableBody');
-            tableBody.innerHTML = ''; // Clear existing rows
-
-            orders.forEach(order => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${order.chemical}</td>
-                    <td>${order.catalog_number}</td>
-                    <td>${order.size}</td>
-                    <td>${order.quantity}</td>
-                    <td>${order.price}</td>
-                    <td>${order.requested_by}</td>
-                    <td class="long-text" onclick="copyToClipboard(this)">${order.website}</td>
-                    <td><button class="delete-button" onclick="deleteOrder(${order.id})">Delete</button></td>
-                `;
-                tableBody.appendChild(row);
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    fetchOrders();
+                    clearOrderForm();
+                }
+            })
+            .catch(err => {
+                console.error('Error adding order:', err);
+                alert('Failed to add order.');
             });
-        })
-        .catch(err => console.error('Error fetching orders:', err));
-}
-
-// Fetch orders on page load
-document.addEventListener('DOMContentLoaded', () => {
-    fetchOrders();
-    fetchRegisteredChemicals(); // Similarly fetch registered chemicals
-});
-
-    function deleteOrder(orderId) {
-    fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
-        method: 'DELETE',
-    })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-            fetchOrders(); // Reload orders table
-        })
-        .catch(err => {
-            console.error('Error deleting order:', err);
-            alert('Failed to delete order.');
-        });
-}
-
-
-
-    function addChemical() {
-        const chemicalName = document.getElementById('chemicalName').value;
-        const chemicalType = document.getElementById('chemicalType').value;
-        const purity = document.getElementById('purity').value;
-        const size = document.getElementById('size').value;
-        const quantity = document.getElementById('quantity').value;
-        const date = document.getElementById('date').value;
-        const recordedBy = document.getElementById('recordedBy').value;
-
-        if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
-            alert('All fields must be filled!');
-            return;
-        }
-
-        const tableBody = document.getElementById('chemicalTableBody');
-        const row = document.createElement('tr');
-
-        row.innerHTML = `
-            <td>${chemicalName}</td>
-            <td>${chemicalType}</td>
-            <td>${purity}</td>
-            <td>${size}</td>
-            <td>${quantity}</td>
-            <td>${date}</td>
-            <td>${recordedBy}</td>
-            <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
-        `;
-
-        tableBody.appendChild(row);
-
-        clearChemicalForm();
-    }
-function exportTableToCSV(filename, tableId) {
-        const table = document.getElementById(tableId);
-        const rows = table.querySelectorAll('tr');
-        let csvContent = '';
-
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('th, td');
-            const rowData = Array.from(cells)
-                .map(cell => `"${cell.textContent.trim()}"`)
-                .join(',');
-            csvContent += rowData + '\n';
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
     }
 
-    function deleteRow(button) {
-        const row = button.parentNode.parentNode;
-        row.parentNode.removeChild(row);
+    // 加载订单
+    function fetchOrders() {
+        fetch(`${API_BASE_URL}/api/orders`)
+            .then(response => response.json())
+            .then(orders => {
+                const tableBody = document.getElementById('orderTableBody');
+                tableBody.innerHTML = '';
+
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${order.chemical}</td>
+                        <td>${order.catalog_number}</td>
+                        <td>${order.size}</td>
+                        <td>${order.quantity}</td>
+                        <td>${order.price}</td>
+                        <td>${order.requested_by}</td>
+                        <td class="long-text" title="${order.website}" onclick="copyToClipboard(this)">${order.website}</td>
+                        <td><button class="delete-button" onclick="deleteOrder(${order.id})">Delete</button></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(err => {
+                console.error('Error fetching orders:', err);
+                alert('Failed to load orders.');
+            });
     }
 
+    // 删除单条订单
+    function deleteOrder(id) {
+        fetch(`${API_BASE_URL}/api/orders/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    fetchOrders();
+                }
+            })
+            .catch(err => {
+                console.error('Error deleting order:', err);
+                alert('Failed to delete order.');
+            });
+    }
+
+    // 清空订单表单
     function clearOrderForm() {
         document.getElementById('orderChemical').value = '';
         document.getElementById('catalogNumber').value = '';
@@ -446,6 +399,85 @@ function exportTableToCSV(filename, tableId) {
         document.getElementById('website').value = '';
     }
 
+    /* -------------------- 化学品功能 -------------------- */
+
+    // 添加化学品
+    function addChemical() {
+        const chemicalData = {
+            chemicalName: document.getElementById('chemicalName').value,
+            chemicalType: document.getElementById('chemicalType').value,
+            purity: document.getElementById('purity').value,
+            size: document.getElementById('size').value,
+            quantity: document.getElementById('quantity').value,
+            date: document.getElementById('date').value,
+            recordedBy: document.getElementById('recordedBy').value
+        };
+
+        fetch(`${API_BASE_URL}/api/addChemical`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(chemicalData),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    fetchChemicals();
+                    clearChemicalForm();
+                }
+            })
+            .catch(err => {
+                console.error('Error adding chemical:', err);
+                alert('Failed to add chemical.');
+            });
+    }
+
+    // 加载化学品
+    function fetchChemicals() {
+        fetch(`${API_BASE_URL}/api/registeredChemicals`)
+            .then(response => response.json())
+            .then(chemicals => {
+                const tableBody = document.getElementById('chemicalTableBody');
+                tableBody.innerHTML = '';
+
+                chemicals.forEach(chemical => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${chemical.chemical_name}</td>
+                        <td>${chemical.chemical_type}</td>
+                        <td>${chemical.purity}</td>
+                        <td>${chemical.size}</td>
+                        <td>${chemical.quantity}</td>
+                        <td>${chemical.date}</td>
+                        <td>${chemical.recorded_by}</td>
+                        <td><button class="delete-button" onclick="deleteChemical(${chemical.id})">Delete</button></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(err => {
+                console.error('Error fetching chemicals:', err);
+                alert('Failed to load chemicals.');
+            });
+    }
+
+    // 删除单条化学品
+    function deleteChemical(id) {
+        fetch(`${API_BASE_URL}/api/registeredChemicals/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    fetchChemicals();
+                }
+            })
+            .catch(err => {
+                console.error('Error deleting chemical:', err);
+                alert('Failed to delete chemical.');
+            });
+    }
+
+    // 清空化学品表单
     function clearChemicalForm() {
         document.getElementById('chemicalName').value = '';
         document.getElementById('chemicalType').value = '';
@@ -455,30 +487,32 @@ function exportTableToCSV(filename, tableId) {
         document.getElementById('date').value = '';
         document.getElementById('recordedBy').value = '';
     }
-    
+
+    /* -------------------- 通用功能 -------------------- */
+
+    // 点击复制链接
     function copyToClipboard(cell) {
-    const textToCopy = cell.textContent.trim();
+        const textToCopy = cell.textContent.trim();
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalText = cell.textContent;
+            cell.textContent = 'Copied!';
+            cell.style.backgroundColor = '#d4edda';
+            cell.style.color = '#155724';
 
-    // 创建一个临时的输入框用于复制
-    const tempInput = document.createElement('input');
-    document.body.appendChild(tempInput);
-    tempInput.value = textToCopy;
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
+            setTimeout(() => {
+                cell.textContent = originalText;
+                cell.style.backgroundColor = '';
+                cell.style.color = '';
+            }, 1500);
+        });
+    }
 
-    // 显示“已复制！”提示
-    const originalText = cell.textContent;
-    cell.textContent = 'Copy！';
-    cell.style.backgroundColor = '#d4edda';
-    cell.style.color = '#155724';
-
-    setTimeout(() => {
-        cell.textContent = originalText; // 恢复原始文本
-        cell.style.backgroundColor = ''; // 恢复背景色
-        cell.style.color = ''; // 恢复文字颜色
-    }, 1500);
-}
+    // 导出表格到 Excel
+    function exportTableToExcel(filename, tableId) {
+        const table = document.getElementById(tableId);
+        const workbook = XLSX.utils.table_to_book(table);
+        XLSX.writeFile(workbook, filename);
+    }
 
 
 </script>
