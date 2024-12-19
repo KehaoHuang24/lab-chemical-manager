@@ -60,7 +60,7 @@ initTables();
 
 // API Endpoints
 
-// Add an order
+// Add a new order
 app.post('/api/addOrder', async (req, res) => {
     const { chemical, catalogNumber, size, quantity, price, requestedBy, website } = req.body;
 
@@ -91,6 +91,7 @@ app.get('/api/orders', async (req, res) => {
         res.status(500).json({ message: 'Error retrieving orders.' });
     }
 });
+
 
 // Add a registered chemical
 app.post('/api/addRegisteredChemical', async (req, res) => {
