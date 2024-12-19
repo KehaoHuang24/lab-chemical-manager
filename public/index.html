@@ -309,24 +309,74 @@ function addOrder() {
         return;
     }
 
-    const tableBody = document.getElementById('orderTableBody');
-    const row = document.createElement('tr');
+    const orderData = { chemical, catalogNumber, size, quantity, price, requestedBy, website };
 
-    row.innerHTML = `
-        <td>${chemical}</td>
-        <td>${catalogNumber}</td>
-        <td>${size}</td>
-        <td>${quantity}</td>
-        <td>${price}</td>
-        <td>${requestedBy}</td>
-        <td class="long-text" onclick="copyToClipboard(this)">${website}</td>
-        <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
-    `;
-
-    tableBody.appendChild(row);
-
-    clearOrderForm();
+    // API call to add order
+    fetch(`${API_BASE_URL}/api/addOrder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                fetchOrders(); // Reload orders table after adding
+                clearOrderForm();
+            }
+        })
+        .catch(err => {
+            console.error('Error adding order:', err);
+            alert('Failed to add order.');
+        });
 }
+
+    function fetchOrders() {
+    fetch(`${API_BASE_URL}/api/orders`)
+        .then(response => response.json())
+        .then(orders => {
+            const tableBody = document.getElementById('orderTableBody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.chemical}</td>
+                    <td>${order.catalog_number}</td>
+                    <td>${order.size}</td>
+                    <td>${order.quantity}</td>
+                    <td>${order.price}</td>
+                    <td>${order.requested_by}</td>
+                    <td class="long-text" onclick="copyToClipboard(this)">${order.website}</td>
+                    <td><button class="delete-button" onclick="deleteOrder(${order.id})">Delete</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(err => console.error('Error fetching orders:', err));
+}
+
+// Fetch orders on page load
+document.addEventListener('DOMContentLoaded', () => {
+    fetchOrders();
+    fetchRegisteredChemicals(); // Similarly fetch registered chemicals
+});
+
+    function deleteOrder(orderId) {
+    fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+        method: 'DELETE',
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            fetchOrders(); // Reload orders table
+        })
+        .catch(err => {
+            console.error('Error deleting order:', err);
+            alert('Failed to delete order.');
+        });
+}
+
 
 
     function addChemical() {
