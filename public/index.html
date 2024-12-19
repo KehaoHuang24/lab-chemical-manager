@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab Chemical Management</title>
+    <title>Lab Chemical Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* 全局样式 */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -20,73 +20,52 @@
             font-size: 2.5em;
         }
 
-        .section-title {
-            margin: 20px auto;
-            text-align: center;
-            font-size: 1.8em;
-        }
-
-        /* 表单容器样式 */
         .form-container {
             width: 90%;
             max-width: 1000px;
             margin: 20px auto;
             background-color: #fff;
-            padding: 20px;
+            padding: 15px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
         }
 
         .form-row {
             display: flex;
             flex-wrap: wrap;
-            width: 100%;
             gap: 10px;
-            align-items: center;
+            margin-bottom: 15px;
         }
 
-        .form-row label {
+        label {
             font-weight: bold;
             margin-right: 5px;
         }
 
-        .form-row input {
-            padding: 8px;
-            font-size: 1em;
+        input, select {
+            padding: 5px;
+            font-size: 0.9em;
             border: 1px solid #ddd;
             border-radius: 4px;
             flex-grow: 1;
-            max-width: 150px;
+            max-width: 130px;
         }
 
-        .add-button, .clean-button, .export-button {
-            background-color: #007bff;
-            color: #fff;
-            font-size: 1.1em;
+        .add-button {
+            background-color: #dc3545;
+            color: white;
+            font-size: 0.9em;
             border: none;
+            padding: 8px 15px;
             border-radius: 5px;
-            padding: 10px 20px;
             cursor: pointer;
             transition: background 0.3s;
         }
 
-        .add-button:hover, .clean-button:hover, .export-button:hover {
-            background-color: #0056b3;
-        }
-
-        .clean-button {
-            background-color: #dc3545;
-        }
-
-        .clean-button:hover {
+        .add-button:hover {
             background-color: #bd2130;
         }
 
-        /* 表格样式 */
         table {
             width: 90%;
             max-width: 1000px;
@@ -96,75 +75,86 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        table th,
-        table td {
+        table th, table td {
             padding: 10px;
             text-align: center;
             border: 1px solid #ddd;
         }
 
         table th {
-            background-color: #f8f9fa;
+            background-color: #fff;
             color: #333;
-            font-size: 1.1em;
+            font-size: 1em;
         }
 
-        /* 按钮容器 */
-        .table-actions {
-            display: flex;
-            justify-content: flex-end;
-            width: 90%;
-            max-width: 1000px;
-            margin: 10px auto;
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            font-size: 0.9em;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
 
-        .table-actions button {
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .action-button {
+            background-color: #28a745;
+            color: white;
+            font-size: 0.9em;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
             margin-left: 10px;
+            transition: background 0.3s;
+        }
+
+        .action-button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
     <h1>Dr. Wang's Lab Chemical Management System</h1>
 
-    <!-- 订试剂表单 -->
+    <!-- 新增订试剂模块 -->
     <div class="form-container">
-        <h2 class="section-title">Order Chemicals</h2>
+        <h2>Order Chemicals</h2>
         <div class="form-row">
-            <label for="orderChemical">Chemical:</label>
-            <input type="text" id="orderChemical">
-
-            <label for="catalogNumber">Catalog Number:</label>
-            <input type="text" id="catalogNumber">
-
-            <label for="orderSize">Size:</label>
-            <input type="text" id="orderSize">
-
-            <label for="orderQuantity">Quantity:</label>
-            <input type="number" id="orderQuantity">
+            <label for="order-chemical">Chemical:</label>
+            <input type="text" id="order-chemical">
+            <label for="catalog-number">Catalog Number:</label>
+            <input type="text" id="catalog-number">
+            <label for="size">Size:</label>
+            <input type="text" id="size">
+            <label for="quantity">Quantity:</label>
+            <input type="text" id="quantity">
         </div>
         <div class="form-row">
             <label for="price">Price:</label>
             <input type="text" id="price">
-
-            <label for="orderDate">Date:</label>
-            <input type="date" id="orderDate">
-
-            <label for="requestedBy">Requested By:</label>
-            <input type="text" id="requestedBy">
-
+            <label for="date">Date:</label>
+            <input type="date" id="date">
+            <label for="requested-by">Requested By:</label>
+            <input type="text" id="requested-by">
             <label for="website">Website:</label>
             <input type="text" id="website">
-
-            <button class="add-button" onclick="addOrder()">Add Order</button>
         </div>
+        <button class="add-button" onclick="addOrder()">Add Order</button>
     </div>
 
     <!-- 订试剂表格 -->
-    <div class="table-actions">
-        <button class="clean-button" onclick="cleanOrderTable()">Clean this table</button>
-        <button class="export-button" onclick="exportOrderTable()">Export</button>
-    </div>
-    <table>
+    <table id="order-table">
         <thead>
             <tr>
                 <th>Chemical</th>
@@ -175,32 +165,81 @@
                 <th>Date</th>
                 <th>Requested By</th>
                 <th>Website</th>
+                <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="orderTableBody">
-            <!-- 数据行将会动态添加到这里 -->
+        <tbody id="order-table-body">
+            <!-- 动态生成数据 -->
         </tbody>
     </table>
+    <div class="action-buttons">
+        <button class="action-button" onclick="exportToExcel('order-table', 'order_table.xlsx')">Export Order Table</button>
+    </div>
+
+    <!-- 原有试剂登记模块 -->
+    <div class="form-container">
+        <h2>Register Chemicals</h2>
+        <div class="form-row">
+            <label for="chemical-name">Chemical Name:</label>
+            <input type="text" id="chemical-name">
+            <label for="chemical-type">Chemical Type:</label>
+            <select id="chemical-type">
+                <option value="Solid">Solid</option>
+                <option value="Liquid">Liquid</option>
+                <option value="Gas">Gas</option>
+            </select>
+            <label for="purity">Purity:</label>
+            <input type="text" id="purity">
+        </div>
+        <div class="form-row">
+            <label for="register-size">Size:</label>
+            <input type="text" id="register-size">
+            <label for="register-quantity">Quantity:</label>
+            <input type="text" id="register-quantity">
+            <label for="register-date">Date:</label>
+            <input type="date" id="register-date">
+            <label for="recorded-by">Recorded By:</label>
+            <input type="text" id="recorded-by">
+        </div>
+        <button class="add-button" onclick="registerChemical()">Add Chemical</button>
+    </div>
+
+    <!-- 试剂登记表格 -->
+    <table id="register-table">
+        <thead>
+            <tr>
+                <th>Chemical Name</th>
+                <th>Chemical Type</th>
+                <th>Purity</th>
+                <th>Size</th>
+                <th>Quantity</th>
+                <th>Date</th>
+                <th>Recorded By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="register-table-body">
+            <!-- 动态生成数据 -->
+        </tbody>
+    </table>
+    <div class="action-buttons">
+        <button class="action-button" onclick="exportToExcel('register-table', 'register_table.xlsx')">Export Register Table</button>
+    </div>
 
     <script>
-        // 订试剂表单逻辑
+        // 添加订单
         function addOrder() {
-            const chemical = document.getElementById('orderChemical').value;
-            const catalogNumber = document.getElementById('catalogNumber').value;
-            const size = document.getElementById('orderSize').value;
-            const quantity = document.getElementById('orderQuantity').value;
+            const chemical = document.getElementById('order-chemical').value;
+            const catalogNumber = document.getElementById('catalog-number').value;
+            const size = document.getElementById('size').value;
+            const quantity = document.getElementById('quantity').value;
             const price = document.getElementById('price').value;
-            const date = document.getElementById('orderDate').value;
-            const requestedBy = document.getElementById('requestedBy').value;
+            const date = document.getElementById('date').value;
+            const requestedBy = document.getElementById('requested-by').value;
             const website = document.getElementById('website').value;
 
-            if (!chemical || !catalogNumber || !date || !requestedBy) {
-                alert('Please fill in all required fields!');
-                return;
-            }
-
-            const tableBody = document.getElementById('orderTableBody');
-            const newRow = `
+            const tableBody = document.getElementById('order-table-body');
+            const row = `
                 <tr>
                     <td>${chemical}</td>
                     <td>${catalogNumber}</td>
@@ -210,40 +249,49 @@
                     <td>${date}</td>
                     <td>${requestedBy}</td>
                     <td>${website}</td>
+                    <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
                 </tr>
             `;
-            tableBody.insertAdjacentHTML('beforeend', newRow);
-
-            // 清空表单
-            document.getElementById('orderChemical').value = '';
-            document.getElementById('catalogNumber').value = '';
-            document.getElementById('orderSize').value = '';
-            document.getElementById('orderQuantity').value = '';
-            document.getElementById('price').value = '';
-            document.getElementById('orderDate').value = '';
-            document.getElementById('requestedBy').value = '';
-            document.getElementById('website').value = '';
+            tableBody.insertAdjacentHTML('beforeend', row);
         }
 
-        function cleanOrderTable() {
-            if (confirm('Are you sure you want to clean the table?')) {
-                document.getElementById('orderTableBody').innerHTML = '';
-            }
+        // 添加登记
+        function registerChemical() {
+            const name = document.getElementById('chemical-name').value;
+            const type = document.getElementById('chemical-type').value;
+            const purity = document.getElementById('purity').value;
+            const size = document.getElementById('register-size').value;
+            const quantity = document.getElementById('register-quantity').value;
+            const date = document.getElementById('register-date').value;
+            const recordedBy = document.getElementById('recorded-by').value;
+
+            const tableBody = document.getElementById('register-table-body');
+            const row = `
+                <tr>
+                    <td>${name}</td>
+                    <td>${type}</td>
+                    <td>${purity}</td>
+                    <td>${size}</td>
+                    <td>${quantity}</td>
+                    <td>${date}</td>
+                    <td>${recordedBy}</td>
+                    <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
+                </tr>
+            `;
+            tableBody.insertAdjacentHTML('beforeend', row);
         }
 
-        function exportOrderTable() {
-            const table = document.querySelector('table');
-            const rows = [...table.rows];
-            const csvContent = rows.map(row => {
-                const cells = [...row.cells];
-                return cells.map(cell => cell.innerText).join(',');
-            }).join('\n');
+        // 删除当前行
+        function deleteRow(button) {
+            const row = button.parentElement.parentElement;
+            row.remove();
+        }
 
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'order_table.csv';
-            a.click();
+        // 导出为 Excel 文件
+        function exportToExcel(tableId, fileName) {
+            const table = document.getElementById(tableId);
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+            XLSX.writeFile(wb, fileName);
         }
     </script>
 </body>
