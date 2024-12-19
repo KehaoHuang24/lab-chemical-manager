@@ -6,6 +6,16 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const path = require('path');
+
+// 提供前端文件
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html')); // 假设前端文件放在 `public` 文件夹
+});
+
+
 // PostgreSQL 数据库连接配置
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
