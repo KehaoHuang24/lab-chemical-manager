@@ -22,70 +22,131 @@ const pool = new Pool({
     },
 });
 
-// Initialize Database Table
-pool.query(`
-    CREATE TABLE IF NOT EXISTS chemicals (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        type TEXT NOT NULL,
-        purity TEXT,
-        size TEXT,
-        quantity INTEGER,
-        date TEXT,
-        recorded_by TEXT
-    )
-`, (err) => {
-    if (err) {
-        console.error('Failed to create database table:', err.message);
-    } else {
-        console.log('Database table is ready.');
+// Initialize Database Tables
+const initTables = async () => {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS orders (
+                id SERIAL PRIMARY KEY,
+                chemical TEXT NOT NULL,
+                catalog_number TEXT NOT NULL,
+                size TEXT,
+                quantity INTEGER,
+                price NUMERIC,
+                requested_by TEXT,
+                website TEXT
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS registered_chemicals (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                purity TEXT,
+                size TEXT,
+                quantity INTEGER,
+                date TEXT,
+                recorded_by TEXT
+            )
+        `);
+
+        console.log('Database tables are ready.');
+    } catch (err) {
+        console.error('Failed to create database tables:', err.message);
     }
-});
+};
+initTables();
 
 // API Endpoints
 
-// Add a new chemical
-app.post('/api/addChemical', async (req, res) => {
-    const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
+// Add an order
+app.post('/api/addOrder', async (req, res) => {
+    const { chemical, catalogNumber, size, quantity, price, requestedBy, website } = req.body;
 
-    if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
+    if (!chemical || !catalogNumber || !size || !quantity || !price || !requestedBy || !website) {
         return res.status(400).json({ message: 'Missing required fields. Please fill out all fields.' });
     }
 
     try {
         await pool.query(
-            `INSERT INTO chemicals (name, type, purity, size, quantity, date, recorded_by)
+            `INSERT INTO orders (chemical, catalog_number, size, quantity, price, requested_by, website)
              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [chemicalName, chemicalType, purity, size, quantity, date, recordedBy]
+            [chemical, catalogNumber, size, quantity, price, requestedBy, website]
         );
-        res.json({ message: 'Chemical added successfully!' });
+        res.json({ message: 'Order added successfully!' });
     } catch (err) {
-        console.error('Error adding chemical:', err.message);
-        res.status(500).json({ message: 'Error adding chemical.' });
+        console.error('Error adding order:', err.message);
+        res.status(500).json({ message: 'Error adding order.' });
     }
 });
 
-// Get all chemicals
-app.get('/api/chemicals', async (req, res) => {
+// Get all orders
+app.get('/api/orders', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM chemicals');
+        const result = await pool.query('SELECT * FROM orders');
         res.json(result.rows);
     } catch (err) {
-        console.error('Error retrieving chemicals:', err.message);
-        res.status(500).json({ message: 'Error retrieving chemicals.' });
+        console.error('Error retrieving orders:', err.message);
+        res.status(500).json({ message: 'Error retrieving orders.' });
     }
 });
 
-// Delete a chemical
-app.delete('/api/chemicals/:id', async (req, res) => {
+// Add a registered chemical
+app.post('/api/addRegisteredChemical', async (req, res) => {
+    const { name, type, purity, size, quantity, date, recordedBy } = req.body;
+
+    if (!name || !type || !purity || !size || !quantity || !date || !recordedBy) {
+        return res.status(400).json({ message: 'Missing required fields. Please fill out all fields.' });
+    }
+
+    try {
+        await pool.query(
+            `INSERT INTO registered_chemicals (name, type, purity, size, quantity, date, recorded_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [name, type, purity, size, quantity, date, recordedBy]
+        );
+        res.json({ message: 'Registered chemical added successfully!' });
+    } catch (err) {
+        console.error('Error adding registered chemical:', err.message);
+        res.status(500).json({ message: 'Error adding registered chemical.' });
+    }
+});
+
+// Get all registered chemicals
+app.get('/api/registeredChemicals', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM registered_chemicals');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error retrieving registered chemicals:', err.message);
+        res.status(500).json({ message: 'Error retrieving registered chemicals.' });
+    }
+});
+
+// Delete an order
+app.delete('/api/orders/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        await pool.query('DELETE FROM chemicals WHERE id = $1', [id]);
-        res.json({ message: 'Chemical deleted successfully!' });
+        await pool.query('DELETE FROM orders WHERE id = $1', [id]);
+        res.json({ message: 'Order deleted successfully!' });
     } catch (err) {
-        console.error('Error deleting chemical:', err.message);
-        res.status(500).json({ message: 'Error deleting chemical.' });
+        console.error('Error deleting order:', err.message);
+        res.status(500).json({ message: 'Error deleting order.' });
+    }
+});
+
+// Delete a registered chemical
+app.delete('/api/registeredChemicals/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await pool.query('DELETE FROM registered_chemicals WHERE id = $1', [id]);
+        res.json({ message: 'Registered chemical deleted successfully!' });
+    } catch (err) {
+        console.error('Error deleting registered chemical:', err.message);
+        res.status(500).json({ message: 'Error deleting registered chemical.' });
     }
 });
 
