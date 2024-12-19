@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+Put your HTML text here<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -224,61 +224,6 @@ td.long-text:hover {
         </tbody>
     </table>
 
-    <div class="form-section" style="display: none;">
-        <h2>Register Chemicals</h2>
-        <div class="form-row">
-            <label for="chemicalName">Chemical Name:</label>
-            <input type="text" id="chemicalName">
-
-            <label for="chemicalType">Chemical Type:</label>
-            <select id="chemicalType">
-                <option value="Solid">Solid</option>
-                <option value="Liquid">Liquid</option>
-                <option value="Fridge">Fridge</option>
-            </select>
-
-            <label for="purity">Purity:</label>
-            <input type="text" id="purity">
-
-            <label for="size">Size:</label>
-            <input type="text" id="size">
-        </div>
-
-        <div class="form-row">
-            <label for="quantity">Quantity:</label>
-            <input type="text" id="quantity">
-
-            <label for="date">Date:</label>
-            <input type="date" id="date">
-
-            <label for="recordedBy">Recorded By:</label>
-            <input type="text" id="recordedBy">
-        </div>
-        
-        <div class="form-row">
-            <button class="add-button" onclick="addChemical()">Add Chemical</button>
-            <button class="add-button" onclick="exportTableToCSV('chemicals.csv', 'chemicalTable')">Export Chemicals</button>
-        </div>
-        
-    </div>
-
-    <table id="chemicalTable" style="display: none;">
-        <thead>
-            <tr>
-                <th>Chemical Name</th>
-                <th>Chemical Type</th>
-                <th>Purity</th>
-                <th>Size</th>
-                <th>Quantity</th>
-                <th>Date</th>
-                <th>Recorded By</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="chemicalTableBody">
-            <!-- Dynamic rows will be added here -->
-        </tbody>
-    </table>
 
 <script>
     const API_BASE_URL = 'https://lab-chemical-manager-1.onrender.com';
@@ -294,7 +239,7 @@ td.long-text:hover {
             document.getElementById('loginModal').style.display = 'none';
             document.querySelector('h1').style.display = 'block';
 
-            // 显示两个表单和表格
+            // 显示表单和表格
             const sections = document.querySelectorAll('.form-section');
             sections.forEach(section => section.style.display = 'block');
 
@@ -403,100 +348,7 @@ td.long-text:hover {
         document.getElementById('website').value = '';
     }
 
-    /* -------------------- 化学品功能 -------------------- */
-
-    // 添加化学品
-    function addChemical() {
-        const chemicalData = {
-            chemicalName: document.getElementById('chemicalName').value,
-            chemicalType: document.getElementById('chemicalType').value,
-            purity: document.getElementById('purity').value,
-            size: document.getElementById('size').value,
-            quantity: document.getElementById('quantity').value,
-            date: document.getElementById('date').value,
-            recordedBy: document.getElementById('recordedBy').value
-        };
-
-fetch(`${API_BASE_URL}/api/addChemical`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(chemicalData),
-})
-.then(response => {
-    console.log('Response status:', response.status);
-    return response.json();
-})
-.then(data => {
-    if (data.message) {
-        alert(data.message);
-        fetchChemicals();
-        clearChemicalForm();
-    } else {
-        console.error('Unexpected response:', data);
-    }
-})
-.catch(err => {
-    console.error('Error adding chemical:', err);
-    alert('Failed to add chemical.');
-});
-
-    }
-
-    // 加载化学品
-    function fetchChemicals() {
-        fetch(`${API_BASE_URL}/api/registeredChemicals`)
-            .then(response => response.json())
-            .then(chemicals => {
-                const tableBody = document.getElementById('chemicalTableBody');
-                tableBody.innerHTML = '';
-
-                chemicals.forEach(chemical => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${chemical.chemical_name}</td>
-                        <td>${chemical.chemical_type}</td>
-                        <td>${chemical.purity}</td>
-                        <td>${chemical.size}</td>
-                        <td>${chemical.quantity}</td>
-                        <td>${chemical.date}</td>
-                        <td>${chemical.recorded_by}</td>
-                        <td><button class="delete-button" onclick="deleteChemical(${chemical.id})">Delete</button></td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            })
-            .catch(err => {
-                console.error('Error fetching chemicals:', err);
-                alert('Failed to load chemicals.');
-            });
-    }
-
-    // 删除单条化学品
-    function deleteChemical(id) {
-        fetch(`${API_BASE_URL}/api/registeredChemicals/${id}`, { method: 'DELETE' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);
-                    fetchChemicals();
-                }
-            })
-            .catch(err => {
-                console.error('Error deleting chemical:', err);
-                alert('Failed to delete chemical.');
-            });
-    }
-
-    // 清空化学品表单
-    function clearChemicalForm() {
-        document.getElementById('chemicalName').value = '';
-        document.getElementById('chemicalType').value = '';
-        document.getElementById('purity').value = '';
-        document.getElementById('size').value = '';
-        document.getElementById('quantity').value = '';
-        document.getElementById('date').value = '';
-        document.getElementById('recordedBy').value = '';
-    }
+  
 
     /* -------------------- 通用功能 -------------------- */
 
