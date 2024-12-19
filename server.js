@@ -6,7 +6,7 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// PostgreSQL 数据库连接
+// PostgreSQL 数据库连接配置
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
@@ -15,7 +15,7 @@ const pool = new Pool({
 app.use(cors());
 app.use(bodyParser.json());
 
-// 创建表：订单表和化学品注册表
+// 创建数据库表
 const createTables = async () => {
     const orderTableQuery = `
         CREATE TABLE IF NOT EXISTS orders (
@@ -26,7 +26,7 @@ const createTables = async () => {
             quantity INTEGER,
             price FLOAT,
             requested_by VARCHAR(255),
-            website VARCHAR(255)
+            website TEXT
         );
     `;
     const chemicalTableQuery = `
@@ -110,10 +110,6 @@ app.get('/api/registeredChemicals', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
 // 删除所有化学品
 app.delete('/api/registeredChemicals', async (req, res) => {
     try {
@@ -125,3 +121,6 @@ app.delete('/api/registeredChemicals', async (req, res) => {
     }
 });
 
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
