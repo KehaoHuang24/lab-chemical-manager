@@ -1,156 +1,127 @@
-// Import necessary modules
 const express = require('express');
-const { Pool } = require('pg');
 const bodyParser = require('body-parser');
+const { Pool } = require('pg');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware
+// PostgreSQL 数据库连接
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+});
+
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// PostgreSQL Database Configuration
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL, // Render PostgreSQL environment variable
-    ssl: {
-        rejectUnauthorized: false, // Required for Render PostgreSQL
-    },
-});
-
-// Initialize Database Tables
-const initTables = async () => {
-    try {
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS orders (
-                id SERIAL PRIMARY KEY,
-                chemical TEXT NOT NULL,
-                catalog_number TEXT NOT NULL,
-                size TEXT,
-                quantity INTEGER,
-                price NUMERIC,
-                requested_by TEXT,
-                website TEXT
-            )
-        `);
-
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS registered_chemicals (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                type TEXT NOT NULL,
-                purity TEXT,
-                size TEXT,
-                quantity INTEGER,
-                date TEXT,
-                recorded_by TEXT
-            )
-        `);
-
-        console.log('Database tables are ready.');
-    } catch (err) {
-        console.error('Failed to create database tables:', err.message);
-    }
+// 创建表：订单表和化学品注册表
+const createTables = async () => {
+    const orderTableQuery = `
+        CREATE TABLE IF NOT EXISTS orders (
+            id SERIAL PRIMARY KEY,
+            chemical VARCHAR(255),
+            catalog_number VARCHAR(255),
+            size VARCHAR(255),
+            quantity INTEGER,
+            price FLOAT,
+            requested_by VARCHAR(255),
+            website VARCHAR(255)
+        );
+    `;
+    const chemicalTableQuery = `
+        CREATE TABLE IF NOT EXISTS registered_chemicals (
+            id SERIAL PRIMARY KEY,
+            chemical_name VARCHAR(255),
+            chemical_type VARCHAR(50),
+            purity VARCHAR(50),
+            size VARCHAR(50),
+            quantity INTEGER,
+            date DATE,
+            recorded_by VARCHAR(255)
+        );
+    `;
+    await pool.query(orderTableQuery);
+    await pool.query(chemicalTableQuery);
 };
-initTables();
+createTables().catch(err => console.error('Error creating tables:', err));
 
-// API Endpoints
-
-// Add a new order (from front-end's addOrder function)
+// 添加订单
 app.post('/api/addOrder', async (req, res) => {
     const { chemical, catalogNumber, size, quantity, price, requestedBy, website } = req.body;
-
-    if (!chemical || !catalogNumber || !size || !quantity || !price || !requestedBy || !website) {
-        return res.status(400).json({ message: 'All fields are required!' });
-    }
-
     try {
-        await pool.query(
-            `INSERT INTO orders (chemical, catalog_number, size, quantity, price, requested_by, website)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        const result = await pool.query(
+            'INSERT INTO orders (chemical, catalog_number, size, quantity, price, requested_by, website) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
             [chemical, catalogNumber, size, quantity, price, requestedBy, website]
         );
-        res.json({ message: 'Order added successfully!' });
+        res.status(201).json({ message: 'Order added successfully!', order: result.rows[0] });
     } catch (err) {
-        console.error('Error adding order:', err.message);
-        res.status(500).json({ message: 'Error adding order.' });
+        console.error('Error adding order:', err);
+        res.status(500).json({ error: 'Failed to add order.' });
     }
 });
 
-// Get all orders
+// 获取所有订单
 app.get('/api/orders', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM orders');
         res.json(result.rows);
     } catch (err) {
-        console.error('Error retrieving orders:', err.message);
-        res.status(500).json({ message: 'Error retrieving orders.' });
+        console.error('Error fetching orders:', err);
+        res.status(500).json({ error: 'Failed to fetch orders.' });
     }
 });
 
-// Add a registered chemical (from front-end's addChemical function)
-app.post('/api/addRegisteredChemical', async (req, res) => {
-    const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
-
-    if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
-        return res.status(400).json({ message: 'All fields are required!' });
-    }
-
+// 删除订单
+app.delete('/api/orders/:id', async (req, res) => {
+    const { id } = req.params;
     try {
-        await pool.query(
-            `INSERT INTO registered_chemicals (name, type, purity, size, quantity, date, recorded_by)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        await pool.query('DELETE FROM orders WHERE id = $1', [id]);
+        res.json({ message: 'Order deleted successfully!' });
+    } catch (err) {
+        console.error('Error deleting order:', err);
+        res.status(500).json({ error: 'Failed to delete order.' });
+    }
+});
+
+// 添加化学品
+app.post('/api/addChemical', async (req, res) => {
+    const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO registered_chemicals (chemical_name, chemical_type, purity, size, quantity, date, recorded_by) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
             [chemicalName, chemicalType, purity, size, quantity, date, recordedBy]
         );
-        res.json({ message: 'Chemical registered successfully!' });
+        res.status(201).json({ message: 'Chemical registered successfully!', chemical: result.rows[0] });
     } catch (err) {
-        console.error('Error adding chemical:', err.message);
-        res.status(500).json({ message: 'Error adding chemical.' });
+        console.error('Error registering chemical:', err);
+        res.status(500).json({ error: 'Failed to register chemical.' });
     }
 });
 
-// Get all registered chemicals
+// 获取所有化学品
 app.get('/api/registeredChemicals', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM registered_chemicals');
         res.json(result.rows);
     } catch (err) {
-        console.error('Error retrieving registered chemicals:', err.message);
-        res.status(500).json({ message: 'Error retrieving registered chemicals.' });
+        console.error('Error fetching chemicals:', err);
+        res.status(500).json({ error: 'Failed to fetch chemicals.' });
     }
 });
 
-// Delete an order
-app.delete('/api/orders/:id', async (req, res) => {
-    const { id } = req.params;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
+// 删除所有化学品
+app.delete('/api/registeredChemicals', async (req, res) => {
     try {
-        await pool.query('DELETE FROM orders WHERE id = $1', [id]);
-        res.json({ message: 'Order deleted successfully!' });
+        await pool.query('DELETE FROM registered_chemicals');
+        res.json({ message: 'All chemicals deleted successfully!' });
     } catch (err) {
-        console.error('Error deleting order:', err.message);
-        res.status(500).json({ message: 'Error deleting order.' });
+        console.error('Error deleting all chemicals:', err);
+        res.status(500).json({ error: 'Failed to delete all chemicals.' });
     }
 });
 
-// Delete a registered chemical
-app.delete('/api/registeredChemicals/:id', async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        await pool.query('DELETE FROM registered_chemicals WHERE id = $1', [id]);
-        res.json({ message: 'Registered chemical deleted successfully!' });
-    } catch (err) {
-        console.error('Error deleting registered chemical:', err.message);
-        res.status(500).json({ message: 'Error deleting registered chemical.' });
-    }
-});
-
-// Start Server
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
