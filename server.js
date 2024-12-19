@@ -106,18 +106,55 @@ app.delete('/api/orders/:id', async (req, res) => {
 
 // 添加化学品
 app.post('/api/addChemical', async (req, res) => {
-    const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
     try {
-        const result = await pool.query(
-            'INSERT INTO registered_chemicals (chemical_name, chemical_type, purity, size, quantity, date, recorded_by) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [chemicalName, chemicalType, purity, size, quantity, date, recordedBy]
-        );
-        res.status(201).json({ message: 'Chemical registered successfully!', chemical: result.rows[0] });
+        // 解构请求体数据
+        const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
+
+        // 校验必填字段
+        if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
+            return res.status(400).json({ 
+                error: 'Missing required fields.', 
+                missingFields: {
+                    chemicalName: !chemicalName,
+                    chemicalType: !chemicalType,
+                    purity: !purity,
+                    size: !size,
+                    quantity: !quantity,
+                    date: !date,
+                    recordedBy: !recordedBy
+                }
+            });
+        }
+
+        // 插入数据到数据库
+        const query = `
+            INSERT INTO registered_chemicals 
+            (chemical_name, chemical_type, purity, size, quantity, date, recorded_by) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) 
+            RETURNING *;
+        `;
+        const values = [chemicalName, chemicalType, purity, size, quantity, date, recordedBy];
+
+        // 执行 SQL 查询
+        const result = await pool.query(query, values);
+
+        // 返回成功响应
+        res.status(201).json({ 
+            message: 'Chemical registered successfully!', 
+            chemical: result.rows[0] 
+        });
     } catch (err) {
+        // 输出详细错误日志
         console.error('Error registering chemical:', err);
-        res.status(500).json({ error: 'Failed to register chemical.' });
+
+        // 返回错误响应
+        res.status(500).json({ 
+            error: 'Failed to register chemical.', 
+            details: err.message 
+        });
     }
 });
+
 
 // 获取所有化学品
 app.get('/api/registeredChemicals', async (req, res) => {
