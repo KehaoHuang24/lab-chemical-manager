@@ -60,12 +60,12 @@ initTables();
 
 // API Endpoints
 
-// Add a new order
+// Add a new order (from front-end's addOrder function)
 app.post('/api/addOrder', async (req, res) => {
     const { chemical, catalogNumber, size, quantity, price, requestedBy, website } = req.body;
 
     if (!chemical || !catalogNumber || !size || !quantity || !price || !requestedBy || !website) {
-        return res.status(400).json({ message: 'Missing required fields. Please fill out all fields.' });
+        return res.status(400).json({ message: 'All fields are required!' });
     }
 
     try {
@@ -92,25 +92,24 @@ app.get('/api/orders', async (req, res) => {
     }
 });
 
-
-// Add a registered chemical
+// Add a registered chemical (from front-end's addChemical function)
 app.post('/api/addRegisteredChemical', async (req, res) => {
-    const { name, type, purity, size, quantity, date, recordedBy } = req.body;
+    const { chemicalName, chemicalType, purity, size, quantity, date, recordedBy } = req.body;
 
-    if (!name || !type || !purity || !size || !quantity || !date || !recordedBy) {
-        return res.status(400).json({ message: 'Missing required fields. Please fill out all fields.' });
+    if (!chemicalName || !chemicalType || !purity || !size || !quantity || !date || !recordedBy) {
+        return res.status(400).json({ message: 'All fields are required!' });
     }
 
     try {
         await pool.query(
             `INSERT INTO registered_chemicals (name, type, purity, size, quantity, date, recorded_by)
              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [name, type, purity, size, quantity, date, recordedBy]
+            [chemicalName, chemicalType, purity, size, quantity, date, recordedBy]
         );
-        res.json({ message: 'Registered chemical added successfully!' });
+        res.json({ message: 'Chemical registered successfully!' });
     } catch (err) {
-        console.error('Error adding registered chemical:', err.message);
-        res.status(500).json({ message: 'Error adding registered chemical.' });
+        console.error('Error adding chemical:', err.message);
+        res.status(500).json({ message: 'Error adding chemical.' });
     }
 });
 
