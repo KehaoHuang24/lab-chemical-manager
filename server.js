@@ -23,7 +23,7 @@ app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html')); // 假设前端文件放在 `public` 文件夹
+    res.sendFile(path.join(__dirname, 'index.html')); 
 });
 
 // Supabase 配置
