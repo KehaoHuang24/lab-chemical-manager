@@ -8,12 +8,22 @@ const PORT = process.env.PORT || 3000;
 
 const path = require('path');
 
+const corsOptions = {
+    origin: '*', // 允许所有来源
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+
+
 // 提供前端文件
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html')); // 假设前端文件放在 `public` 文件夹
 });
+
 
 
 // PostgreSQL 数据库连接配置
