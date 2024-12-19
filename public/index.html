@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab Chemical Management System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Lab Chemical Management</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,45 +24,52 @@
             max-width: 1000px;
             margin: 20px auto;
             background-color: #fff;
-            padding: 15px;
+            padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
         }
 
-        .form-row {
+        .form-container .form-row {
             display: flex;
             flex-wrap: wrap;
+            width: 100%;
             gap: 10px;
-            margin-bottom: 15px;
+            align-items: center;
         }
 
-        label {
+        .form-container label {
             font-weight: bold;
             margin-right: 5px;
         }
 
-        input, select {
-            padding: 5px;
-            font-size: 0.9em;
+        .form-container input,
+        .form-container select {
+            padding: 8px;
+            font-size: 1em;
             border: 1px solid #ddd;
             border-radius: 4px;
             flex-grow: 1;
-            max-width: 130px;
+            max-width: 150px;
+            box-sizing: border-box;
         }
 
         .add-button {
-            background-color: #dc3545;
-            color: white;
-            font-size: 0.9em;
+            background-color: #28a745;
+            color: #fff;
+            font-size: 1.1em;
             border: none;
-            padding: 8px 15px;
             border-radius: 5px;
+            padding: 10px 20px;
             cursor: pointer;
             transition: background 0.3s;
         }
 
         .add-button:hover {
-            background-color: #bd2130;
+            background-color: #218838;
         }
 
         table {
@@ -75,137 +81,122 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        table th, table td {
+        table th,
+        table td {
             padding: 10px;
             text-align: center;
             border: 1px solid #ddd;
         }
 
         table th {
-            background-color: #fff;
+            background-color: #f1f1f1;
             color: #333;
-            font-size: 1em;
+            font-size: 1.1em;
         }
 
         .delete-button {
             background-color: #dc3545;
             color: white;
-            font-size: 0.9em;
             border: none;
             padding: 5px 10px;
-            border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
+            border-radius: 5px;
         }
 
         .delete-button:hover {
-            background-color: #c82333;
+            background-color: #bd2130;
         }
 
-        .action-buttons {
-            text-align: center;
-            margin: 20px 0;
+        #loginModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 300px;
         }
 
-        .action-button {
-            background-color: #28a745;
+        #loginModal form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #loginModal label {
+            font-weight: bold;
+        }
+
+        #loginModal input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #loginModal button {
+            background-color: #007bff;
             color: white;
-            font-size: 0.9em;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 10px;
+            border-radius: 4px;
             cursor: pointer;
-            margin-left: 10px;
-            transition: background 0.3s;
         }
 
-        .action-button:hover {
-            background-color: #218838;
+        #loginModal button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h1>Dr. Wang's Lab Chemical Management System</h1>
-
-    <!-- 新增订试剂模块 -->
-    <div class="form-container">
-        <h2>Order Chemicals</h2>
-        <div class="form-row">
-            <label for="order-chemical">Chemical:</label>
-            <input type="text" id="order-chemical">
-            <label for="catalog-number">Catalog Number:</label>
-            <input type="text" id="catalog-number">
-            <label for="size">Size:</label>
-            <input type="text" id="size">
-            <label for="quantity">Quantity:</label>
-            <input type="text" id="quantity">
-        </div>
-        <div class="form-row">
-            <label for="price">Price:</label>
-            <input type="text" id="price">
-            <label for="date">Date:</label>
-            <input type="date" id="date">
-            <label for="requested-by">Requested By:</label>
-            <input type="text" id="requested-by">
-            <label for="website">Website:</label>
-            <input type="text" id="website">
-        </div>
-        <button class="add-button" onclick="addOrder()">Add Order</button>
+    <div id="loginModal">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
     </div>
 
-    <!-- 订试剂表格 -->
-    <table id="order-table">
-        <thead>
-            <tr>
-                <th>Chemical</th>
-                <th>Catalog Number</th>
-                <th>Size</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Date</th>
-                <th>Requested By</th>
-                <th>Website</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="order-table-body">
-            <!-- 动态生成数据 -->
-        </tbody>
-    </table>
-    <div class="action-buttons">
-        <button class="action-button" onclick="exportToExcel('order-table', 'order_table.xlsx')">Export Order Table</button>
-    </div>
+    <h1 style="display: none;">Lab Chemical Management System</h1>
 
-    <!-- 原有试剂登记模块 -->
     <div class="form-container">
-        <h2>Register Chemicals</h2>
         <div class="form-row">
-            <label for="chemical-name">Chemical Name:</label>
-            <input type="text" id="chemical-name">
-            <label for="chemical-type">Chemical Type:</label>
-            <select id="chemical-type">
+            <label for="chemicalName">Chemical Name:</label>
+            <input type="text" id="chemicalName">
+
+            <label for="chemicalType">Chemical Type:</label>
+            <select id="chemicalType">
                 <option value="Solid">Solid</option>
                 <option value="Liquid">Liquid</option>
-                <option value="Gas">Gas</option>
+                <option value="Fridge">Fridge</option>
             </select>
+
             <label for="purity">Purity:</label>
             <input type="text" id="purity">
+
+            <label for="size">Size:</label>
+            <input type="text" id="size">
         </div>
+
         <div class="form-row">
-            <label for="register-size">Size:</label>
-            <input type="text" id="register-size">
-            <label for="register-quantity">Quantity:</label>
-            <input type="text" id="register-quantity">
-            <label for="register-date">Date:</label>
-            <input type="date" id="register-date">
-            <label for="recorded-by">Recorded By:</label>
-            <input type="text" id="recorded-by">
+            <label for="quantity">Quantity:</label>
+            <input type="text" id="quantity">
+
+            <label for="date">Date:</label>
+            <input type="date" id="date">
+
+            <label for="recordedBy">Recorded By:</label>
+            <input type="text" id="recordedBy">
+
+            <button class="add-button" onclick="addChemical()">Add Chemical</button>
         </div>
-        <button class="add-button" onclick="registerChemical()">Add Chemical</button>
     </div>
 
-    <!-- 试剂登记表格 -->
-    <table id="register-table">
+    <table style="display: none;">
         <thead>
             <tr>
                 <th>Chemical Name</th>
@@ -218,80 +209,92 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="register-table-body">
-            <!-- 动态生成数据 -->
+        <tbody id="tableBody">
+            <!-- Dynamic rows will be added here -->
         </tbody>
     </table>
-    <div class="action-buttons">
-        <button class="action-button" onclick="exportToExcel('register-table', 'register_table.xlsx')">Export Register Table</button>
-    </div>
 
-    <script>
-        // 添加订单
-        function addOrder() {
-            const chemical = document.getElementById('order-chemical').value;
-            const catalogNumber = document.getElementById('catalog-number').value;
+<script>
+        const API_BASE_URL = 'https://lab-chemical-manager-1.onrender.com'; // 替换为您的后端地址
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'wanglab' && password === 'advfoodpackaging') {
+                document.getElementById('loginModal').style.display = 'none';
+                document.querySelector('h1').style.display = 'block';
+                document.querySelector('.form-container').style.display = 'flex';
+                document.querySelector('table').style.display = 'table';
+                loadChemicals();
+            } else {
+                alert('Invalid credentials!');
+            }
+        }
+
+        async function addChemical() {
+            const chemicalName = document.getElementById('chemicalName').value;
+            const chemicalType = document.getElementById('chemicalType').value;
+            const purity = document.getElementById('purity').value;
             const size = document.getElementById('size').value;
             const quantity = document.getElementById('quantity').value;
-            const price = document.getElementById('price').value;
             const date = document.getElementById('date').value;
-            const requestedBy = document.getElementById('requested-by').value;
-            const website = document.getElementById('website').value;
+            const recordedBy = document.getElementById('recordedBy').value;
 
-            const tableBody = document.getElementById('order-table-body');
-            const row = `
-                <tr>
-                    <td>${chemical}</td>
-                    <td>${catalogNumber}</td>
-                    <td>${size}</td>
-                    <td>${quantity}</td>
-                    <td>${price}</td>
-                    <td>${date}</td>
-                    <td>${requestedBy}</td>
-                    <td>${website}</td>
-                    <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
-                </tr>
-            `;
-            tableBody.insertAdjacentHTML('beforeend', row);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/addChemical`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chemicalName, chemicalType, purity, size, quantity, date, recordedBy }),
+                });
+
+                if (!response.ok) throw new Error('Failed to add chemical.');
+                alert('Chemical added successfully!');
+                loadChemicals();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            }
         }
 
-        // 添加登记
-        function registerChemical() {
-            const name = document.getElementById('chemical-name').value;
-            const type = document.getElementById('chemical-type').value;
-            const purity = document.getElementById('purity').value;
-            const size = document.getElementById('register-size').value;
-            const quantity = document.getElementById('register-quantity').value;
-            const date = document.getElementById('register-date').value;
-            const recordedBy = document.getElementById('recorded-by').value;
-
-            const tableBody = document.getElementById('register-table-body');
-            const row = `
-                <tr>
-                    <td>${name}</td>
-                    <td>${type}</td>
-                    <td>${purity}</td>
-                    <td>${size}</td>
-                    <td>${quantity}</td>
-                    <td>${date}</td>
-                    <td>${recordedBy}</td>
-                    <td><button class="delete-button" onclick="deleteRow(this)">Delete</button></td>
-                </tr>
-            `;
-            tableBody.insertAdjacentHTML('beforeend', row);
+        async function loadChemicals() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chemicals`);
+                if (!response.ok) throw new Error('Failed to load chemicals.');
+                const data = await response.json();
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = '';
+                data.forEach(row => {
+                    const newRow = `
+                        <tr>
+                            <td>${row.name}</td>
+                            <td>${row.type}</td>
+                            <td>${row.purity}</td>
+                            <td>${row.size}</td>
+                            <td>${row.quantity}</td>
+                            <td>${row.date}</td>
+                            <td>${row.recorded_by}</td>
+                            <td><button onclick="deleteChemical(${row.id})">Delete</button></td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', newRow);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            }
         }
 
-        // 删除当前行
-        function deleteRow(button) {
-            const row = button.parentElement.parentElement;
-            row.remove();
-        }
-
-        // 导出为 Excel 文件
-        function exportToExcel(tableId, fileName) {
-            const table = document.getElementById(tableId);
-            const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-            XLSX.writeFile(wb, fileName);
+        async function deleteChemical(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chemicals/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete chemical.');
+                alert('Chemical deleted successfully!');
+                loadChemicals();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            }
         }
     </script>
 </body>
