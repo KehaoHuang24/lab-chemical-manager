@@ -318,13 +318,14 @@ function fetchChemicals() {
         })
         .then(data => {
             console.log('Fetched Chemicals:', data); // 打印化学品数据
-            // 在此处理化学品数据，例如显示在表格中
+            // 您可以在这里处理数据，例如将其渲染到页面
         })
         .catch(err => {
             console.error('Error fetching chemicals:', err);
             alert('Failed to load chemicals.');
         });
 }
+
 
     // 删除单条订单
     function deleteOrder(id) {
