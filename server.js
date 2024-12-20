@@ -68,28 +68,24 @@ createTables().catch(err => console.error('Error creating tables:', err));
 
 // 添加订单
 app.post('/api/addOrder', async (req, res) => {
-    console.log('Received request body:', req.body); // 添加日志
     const { chemical, catalogNumber, size, quantity, price, requestedBy, website } = req.body;
     try {
         const { data, error } = await supabase
-        .from('orders')
-        .insert([
-            { chemical, catalog_number: catalogNumber, size, quantity, price, requested_by: requestedBy, website }
-        ])
-        .select(); // 添加 .select() 以返回插入的记录
-    
-    
-        // 打印 Supabase 响应
-        console.log('Supabase response:', { data, error });
-    
-        if (error) throw error; // 如果有错误，抛出
-    
-        res.status(201).json({ message: 'Order added successfully!', order: data ? data[0] : null });
+            .from('orders')
+            .insert([
+                { chemical, catalog_number: catalogNumber, size, quantity, price, requested_by: requestedBy, website }
+            ])
+            .select(); // 确保返回插入的记录
+
+        if (error) throw error;
+
+        console.log('Inserted Data:', data); // 打印插入的数据
+        res.status(201).json({ message: 'Order added successfully!', order: data[0] });
     } catch (err) {
-        console.error('Error adding order:', err); // 打印错误
+        console.error('Error adding order:', err);
         res.status(500).json({ error: 'Failed to add order.' });
     }
-    
+   
 });
 
 
