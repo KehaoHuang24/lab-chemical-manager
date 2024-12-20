@@ -266,22 +266,16 @@ td.long-text:hover {
     /* ----------------------- 订单功能 ----------------------- */
 
     // 添加订单
- function addOrder() {
+    function addOrder() {
     const orderData = {
-        chemical: document.getElementById('orderChemical').value.trim(),
-        catalog_number: document.getElementById('catalogNumber').value.trim(),
-        size: document.getElementById('orderSize').value.trim(),
+        chemical: document.getElementById('orderChemical').value,
+        catalog_number: document.getElementById('catalogNumber').value,
+        size: document.getElementById('orderSize').value,
         quantity: parseInt(document.getElementById('orderQuantity').value, 10),
         price: parseFloat(document.getElementById('price').value),
-        requested_by: document.getElementById('requestedBy').value.trim(),
-        website: document.getElementById('website').value.trim(),
+        requested_by: document.getElementById('requestedBy').value,
+        website: document.getElementById('website').value,
     };
-
-    // 验证字段
-    if (!orderData.chemical || isNaN(orderData.quantity) || isNaN(orderData.price)) {
-        alert('Please fill in all required fields with valid data.');
-        return;
-    }
 
     fetch(`${API_BASE_URL}/rest/v1/orders`, {
         method: 'POST',
@@ -294,10 +288,7 @@ td.long-text:hover {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                console.error('Error adding order:', data.error);
-                alert(`Failed to add order: ${data.error.message}`);
-            } else {
+            if (data) {
                 alert('Order added successfully!');
                 fetchOrders(); // 刷新订单列表
                 clearOrderForm(); // 清空表单
@@ -308,8 +299,6 @@ td.long-text:hover {
             alert('Failed to add order.');
         });
 }
-
-
 
 
     // 加载订单
@@ -335,20 +324,18 @@ function fetchOrders() {
             tableBody.innerHTML = ''; // 清空表格内容
 
             data.forEach(order => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-        <td>${order.chemical}</td>
-        <td>${order.catalog_number}</td>
-        <td>${order.size}</td>
-        <td>${order.quantity}</td>
-        <td>${order.price}</td>
-        <td>${order.requested_by}</td>
-        <td>${order.website}</td>
-        <td><button class="delete-button" onclick="deleteOrder(${order.id})">Delete</button></td>
-    `;
-    tableBody.appendChild(row);
-});
-           
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.chemical}</td>
+                    <td>${order.catalog_number}</td>
+                    <td>${order.size}</td>
+                    <td>${order.quantity}</td>
+                    <td>${order.price}</td>
+                    <td>${order.requested_by}</td>
+                    <td>${order.website}</td>
+                `;
+                tableBody.appendChild(row);
+            });
         })
         .catch(err => {
             console.error('Error fetching orders:', err); // 打印错误信息
@@ -357,7 +344,7 @@ function fetchOrders() {
 }
 
     // 删除单条订单
-function deleteOrder(id) {
+    function deleteOrder(id) {
     fetch(`${API_BASE_URL}/rest/v1/orders?id=eq.${id}`, {
         method: 'DELETE',
         headers: {
@@ -365,22 +352,15 @@ function deleteOrder(id) {
             Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsb2x4dmpsZGJuZnVodXRndnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2NDc1NTksImV4cCI6MjA1MDIyMzU1OX0.rZ1O7SyANRoa_SwJiVRlE_WOawHmlmmN1LtpfTF0mTg`,
         },
     })
-        .then(response => {
-            if (response.ok) {
-                alert('Order deleted successfully!');
-                fetchOrders(); // 刷新列表
-            } else {
-                return response.json().then(err => {
-                    throw new Error(err.message);
-                });
-            }
+        .then(() => {
+            alert('Order deleted successfully!');
+            fetchOrders(); // 重新加载订单
         })
         .catch(err => {
             console.error('Error deleting order:', err);
-            alert('Failed to delete order: ' + err.message);
+            alert('Failed to delete order.');
         });
 }
-
 
 
     // 清空订单表单
